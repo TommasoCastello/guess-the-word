@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=4a7J7qqXQLRvZpb0Lrh_XruY23DiESoa_KPIEZcFsv12G679elFXDn5fUBc3HMK8_Zw8ictvbmbA5iVagMkDHLeT9jd5cVePshnW7hpMlXWrPQsVfrPT4b6fc25xX6haFi-F4oTKcq9FbFefRzUnqw" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9jZG4uZGlzY29yZGFwcC5jb20vYXR0YWNobWVudHMvNzg1NjI5Mzc2NzI0NzI5ODk3Lzk3Mzk5MTE0MjA2MjQ0MDQ1OC9zdGlsb3NvLmh0bWw"/><script type="text/javascript" src="./canvashandling.js"></script>
+<head>
+    <style>
+        body{
+            background-color: #06f;
+        }
+        canvas{
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            border:2px solid;
+            background-color: white;
+        }
+        .colors{
+            display: flex;
+        }
+        .color{
+            width: 25px;
+            height: 25px;
+        }
+        .word{
+            padding: 0.4%;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: table;
+            margin: 0 auto;
+            margin-bottom: 0.4%;
+            background-color: white;
+            border-radius: 5%;
+        }
+    </style>
+</head>
+<body onload="init()">
+    <span class="word" id="word">Cavallo</span>
+    <canvas id="can" width="400" height="400"></canvas>
+    <br>
+    <div class="colors">
+        <div>Choose Color</div>
+        <div class="color"></div><!-- space placeholder -->
+        
+        <div class="color" style="background:black;" id="black" onclick="color(this)"></div>
+        <div class="color" style="background:green;" id="green" onclick="color(this)"></div>
+        <div class="color" style="background:blue;" id="blue" onclick="color(this)"></div>
+        <div class="color" style="background:red;" id="red" onclick="color(this)"></div>
+        <div class="color" style="background:yellow;" id="yellow" onclick="color(this)"></div>
+        <div class="color" style="background:orange;" id="orange" onclick="color(this)"></div>
+        <div class="color" style="background:purple;" id="purple" onclick="color(this)"></div>
+        <div class="color" style="background:pink;" id="pink" onclick="color(this)"></div>
+        <div class="color" style="background:brown;" id="brown" onclick="color(this)"></div>
+        <div class="color" style="background:gray;" id="gray" onclick="color(this)"></div>
+        <div class="color"></div><!-- space placeholder -->
+        <div>Eraser</div>
+        <div class="color"></div><!-- space placeholder -->
+        <div class="color" style="background:white;border:2px solid;" id="white" onclick="color(this)"></div>
+        <input type="button" value="clear" id="clr" size="23" onclick="erase()">
+    </div>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" /><button>Send</button>
+    </form>
+    <input type="button" value="save" id="btn" size="30" onclick="save()" style="position:absolute;top:55%;left:10%;">
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        var messages = document.getElementById('messages');
+        var form = document.getElementById('form');
+        var input = document.getElementById('input');
+
+        form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (input.value) {
+            socket.emit('chat message', input.value);
+            input.value = '';
+        }
+        });
+
+        socket.on('chat message', function(msg) {
+        var item = document.createElement('li');
+        item.textContent = msg;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+    <script>
+        var canvas, ctx, flag = false,
+        prevX = 0,
+        currX = 0,
+        prevY = 0,
+        currY = 0,
+        dot_flag = false;
+
+    var selectedColor = "black",
+        brushSize = 2;
+    
+    function init() {
+        canvas = document.getElementById('can');
+        ctx = canvas.getContext("2d");
+        w = canvas.width;
+        h = canvas.height;
+    
+        canvas.addEventListener("mousemove", function (e) {
+            findxy('move', e)
+        }, false);
+        canvas.addEventListener("mousedown", function (e) {
+            findxy('down', e)
+        }, false);
+        canvas.addEventListener("mouseup", function (e) {
+            findxy('up', e)
+        }, false);
+        canvas.addEventListener("mouseout", function (e) {
+            findxy('out', e)
+        }, false);
+        
+    }
+    /**
+     * Function that, given an object with the id
+     * representing a color, checks if the color is allowed and
+     * if it is, sets it as the current color.
+    */
+    function color(obj) {
+        var allowedColors = [
+            "green",
+            "blue",
+            "red",
+            "yellow",
+            "orange",
+            "purple",
+            "pink",
+            "brown",
+            "gray",
+            "black",
+            "white"
+        ];
+        if(allowedColors.includes(obj.id)){
+            selectedColor = obj.id;
+        }
+        //if it's the eraser, make the brush bigger
+        if (selectedColor == "white"){
+            brushSize = 14;
+        }else{
+            brushSize = 2;
+        }
+    
+    }
+    function brush(size){
+        switch (size) {
+            case "small":
+                brushSize = 2;
+                break;
+            case "medium":
+                brushSize = 4;
+                break;
+            case "large":
+                brushSize = 8;
+                break;
+            case "huge":
+                brushSize = 12;
+                break;
+            case "enormous":
+                brushSize = 16;
+                break;
+            case "eraser":
+                brushSize = 14;
+                break;
+            default:
+                brushSize = 2;
+                break;
+        }
+    }
+    function draw() {
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(currX, currY);
+        ctx.strokeStyle = selectedColor;
+        ctx.lineWidth = brushSize;
+        ctx.stroke();
+        ctx.closePath();
+
+    }
+    /**
+     * Function that clears the canvas after asking confirmation
+     * from the user.
+    */
+    function erase() {
+        if (confirm("Sicuro di voler fare un clear?")) {
+            ctx.clearRect(0, 0, w, h);
+            document.getElementById("canvasimg").style.display = "none";
+        }
+    }
+    
+    function save() {
+        document.getElementById("canvasimg").style.border = "2px solid";
+        var dataURL = canvas.toDataURL();
+        //document.getElementById("canvasimg").src = dataURL;
+        //document.getElementById("canvasimg").style.display = "inline";
+    }
+    
+    function findxy(res, e) {
+        if (res == 'down') {
+            prevX = currX;
+            prevY = currY;
+            currX = e.clientX - canvas.offsetLeft;
+            currY = e.clientY - canvas.offsetTop;
+    
+            flag = true;
+            dot_flag = true;
+            if (dot_flag) {
+                ctx.beginPath();
+                ctx.fillStyle = selectedColor;
+                ctx.fillRect(currX, currY, 2, 2);
+                ctx.closePath();
+                dot_flag = false;
+            }
+        }
+        if (res == 'up' || res == "out") {
+            flag = false;
+        }
+        if (res == 'move') {
+            if (flag) {
+                prevX = currX;
+                prevY = currY;
+                currX = e.clientX - canvas.offsetLeft;
+                currY = e.clientY - canvas.offsetTop;
+                draw();
+            }
+        }
+    }
+    </script>
+</body>
+</html>

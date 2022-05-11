@@ -1,0 +1,32 @@
+{
+  "name": "guess-the-word",
+  "version": "1.0.0",
+  "description": "Skribbl lone",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TommasoCastello/guess-the-word.git"
+  },
+  "keywords": [
+    "skribbl",
+    "draw",
+    "game",
+    "multiplayer",
+    "js",
+    "node"
+  ],
+  "author": "Tommaso Castello, Jan Rezzonico",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TommasoCastello/guess-the-word/issues"
+  },
+  "homepage": "https://github.com/TommasoCastello/guess-the-word#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "socket.io": "^4.5.0"
+  }
+}
