@@ -3,7 +3,7 @@
 <head>
     <style>
         body{
-            background-color: #06f;
+            background-color: rgb(45, 127, 251);
         }
         canvas{
             padding-left: 0;
@@ -55,60 +55,117 @@
             border-radius: 10%;
             margin: 0.4%;
         }
-        .chatmessage{
+        #messages > li{
             list-style: none;
+        }
+        .loginform{
+            border-radius: 2%;
+            margin-top: 20vh;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+            background-color: rgb(45, 127, 251);
+            padding: 45px;
+            text-align: center;
+            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        }
+        .loginform input{
+            outline: 0;
+            background: #f2f2f2;
+            width: 100%;
+            border: 0;
+            margin: 0 0 15px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .loginform input[type=button]{
+            text-transform: uppercase;
+            outline: 0;
+            background: #06F;
+            width: 100%;
+            border: 0;
+            padding: 15px;
+            color: #FFFFFF;
+            font-size: 14px;
+            -webkit-transition: all 0.3 ease;
+            transition: all 0.3 ease;
+            cursor: pointer;
+            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
         }
     </style>
 </head>
 <body onload="init()">
-    <span class="word" id="word">Cavallo</span>
-    <canvas id="can" width="800" height="600"></canvas>
-    <br>
-    <div class="colors">
-        <div class="color" style="background:black;" id="black" onclick="color(this)"></div>
-        <div class="color" style="background:green;" id="green" onclick="color(this)"></div>
-        <div class="color" style="background:blue;" id="blue" onclick="color(this)"></div>
-        <div class="color" style="background:red;" id="red" onclick="color(this)"></div>
-        <div class="color" style="background:yellow;" id="yellow" onclick="color(this)"></div>
-        <div class="color" style="background:orange;" id="orange" onclick="color(this)"></div>
-        <div class="color" style="background:purple;" id="purple" onclick="color(this)"></div>
-        <div class="color" style="background:pink;" id="pink" onclick="color(this)"></div>
-        <div class="color" style="background:brown;" id="brown" onclick="color(this)"></div>
-        <div class="color" style="background:gray;" id="gray" onclick="color(this)"></div>
-        <div class="color"></div><!-- space placeholder -->
-        <div>Eraser</div>
-        <div class="color"></div><!-- space placeholder -->
-        <div class="color" style="background:white;border:2px solid;" id="white" onclick="color(this)"></div>
-        <input type="button" value="clear" id="clr" size="23" onclick="erase()">
-    </div>
-    <div class="brushes">
-        <div class="color"></div><!-- space placeholder -->
-        <div class="brushcontainer" id="small" onclick="brush(this)">
-            <div class="brush" style="width: 2px; height: 2px;"></div>
+    <section id="login">
+        <form name="login" class="loginform">
+            <input type="text" name="username" placeholder="Username">
+            <input type="number" name="roomcode" placeholder="Room code">
+            <input type="button" onclick="validateLoginForm()" value="GO">
+        </form>
+    </section>
+    <section id="game" style="display: none;">
+        <span class="word" id="word">Cavallo</span>
+        <canvas id="can" width="800" height="600"></canvas>
+        <br>
+        <div class="colors">
+            <div class="color" style="background:black;" id="black" onclick="color(this)"></div>
+            <div class="color" style="background:green;" id="green" onclick="color(this)"></div>
+            <div class="color" style="background:blue;" id="blue" onclick="color(this)"></div>
+            <div class="color" style="background:red;" id="red" onclick="color(this)"></div>
+            <div class="color" style="background:yellow;" id="yellow" onclick="color(this)"></div>
+            <div class="color" style="background:orange;" id="orange" onclick="color(this)"></div>
+            <div class="color" style="background:purple;" id="purple" onclick="color(this)"></div>
+            <div class="color" style="background:pink;" id="pink" onclick="color(this)"></div>
+            <div class="color" style="background:brown;" id="brown" onclick="color(this)"></div>
+            <div class="color" style="background:gray;" id="gray" onclick="color(this)"></div>
+            <div class="color"></div><!-- space placeholder -->
+            <div>Eraser</div>
+            <div class="color"></div><!-- space placeholder -->
+            <div class="color" style="background:white;border:2px solid;" id="white" onclick="color(this)"></div>
+            <input type="button" value="clear" id="clr" size="23" onclick="erase()">
         </div>
-        <div class="brushcontainer" id="medium" onclick="brush(this)">
-            <div class="brush" style="width: 4px; height: 4px;"></div>
+        <div class="brushes">
+            <div class="color"></div><!-- space placeholder -->
+            <div class="brushcontainer" id="small" onclick="brush(this)">
+                <div class="brush" style="width: 2px; height: 2px;"></div>
+            </div>
+            <div class="brushcontainer" id="medium" onclick="brush(this)">
+                <div class="brush" style="width: 4px; height: 4px;"></div>
+            </div>
+            <div class="brushcontainer" id="large" onclick="brush(this)">
+                <div class="brush" style="width: 8px; height: 8px;"></div>
+            </div>
+            <div class="brushcontainer" id="huge" onclick="brush(this)">
+                <div class="brush" style="width: 12px; height: 12px;"></div>
+            </div>
+            <div class="brushcontainer" id="enormous" onclick="brush(this)">
+                <div class="brush" style="width: 16px; height: 16px;"></div>
+            </div>
+                <button onclick="fillbg()">Fill</button>
         </div>
-        <div class="brushcontainer" id="large" onclick="brush(this)">
-            <div class="brush" style="width: 8px; height: 8px;"></div>
-        </div>
-        <div class="brushcontainer" id="huge" onclick="brush(this)">
-            <div class="brush" style="width: 12px; height: 12px;"></div>
-        </div>
-        <div class="brushcontainer" id="enormous" onclick="brush(this)">
-            <div class="brush" style="width: 16px; height: 16px;"></div>
-        </div>
-    </div>
-    <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
-    </form>
-    <input type="button" value="save" id="btn" size="30" onclick="save()" style="position:absolute;top:55%;left:10%;">
+        <ul id="messages"></ul>
+        <form id="form" action="">
+        <input id="input" autocomplete="off" /><button>Send</button>
+        </form>
+        <input type="button" value="save" id="btn" size="30" onclick="save()" style="position:absolute;top:55%;left:10%;">
+    </section>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        var username;
+        var room;
+        function validateLoginForm(){
+            var usernamein = document.forms["login"]["username"].value;
+            var roomcodein = document.forms["login"]["roomcode"].value;
+            if (usernamein == "" || roomcodein == "" || usernamein == null || roomcodein == null) {
+                alert("Please fill in all fields");
+            }else{
+                username = usernamein;
+                room = roomcodein;
+                document.getElementById("login").style.display = "none";
+                document.getElementById("game").style.display = "block";
+                socket.emit('join room', room);
+            }
+        }
         var socket = io();
-        var room = prompt("Enter room name");
-        socket.emit('join room', room);
         var messages = document.getElementById('messages');
         var form = document.getElementById('form');
         var input = document.getElementById('input');
@@ -212,13 +269,14 @@
     }
     function draw() {
         ctx.beginPath();
+        ctx.lineCap = "round";
+        ctx.strokeStyle = selectedColor;
+        ctx.fillStyle = selectedColor;
+        ctx.lineWidth = brushSize;
         ctx.moveTo(prevX, prevY);
         ctx.lineTo(currX, currY);
-        ctx.strokeStyle = selectedColor;
-        ctx.lineWidth = brushSize;
         ctx.stroke();
         ctx.closePath();
-
     }
     /**
      * Function that clears the canvas after asking confirmation
@@ -227,10 +285,14 @@
     function erase() {
         if (confirm("Sicuro di voler fare un clear?")) {
             ctx.clearRect(0, 0, w, h);
-            document.getElementById("canvasimg").style.display = "none";
         }
     }
-    
+    function fillbg(){
+        if (confirm("Sicuro di voler fare un fill " + selectedColor +"?")) {
+            ctx.fillStyle = selectedColor;
+            ctx.fillRect(0, 0, w, h);
+        }
+    }
     function save() {
         document.getElementById("canvasimg").style.border = "2px solid";
         var dataURL = canvas.toDataURL();
