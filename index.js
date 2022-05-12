@@ -7,9 +7,15 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-io.on('connection', (socket) => {
-  socket.on('chat message', msg => {
-    io.emit('chat message', msg);
+io.on('connection', (socket, room) => {
+
+  socket.on('join room', (room) => {
+    socket.join(room);
+    console.log('joined room', room);
+  });
+
+  socket.on('chat message', (msg, room) => {
+    io.in(room).emit('chat message', msg);
   });
 });
 
