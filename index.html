@@ -11,11 +11,14 @@
             margin-left: auto;
             margin-right: auto;
             display: block;
-            border:2px solid;
+            border: 2px solid;
             background-color: white;
         }
         .colors{
             display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
         }
         .color{
             width: 25px;
@@ -31,16 +34,37 @@
             background-color: white;
             border-radius: 5%;
         }
+        .brushes{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .brush{
+            border-radius: 50%;
+            background-color: black;
+        }
+        .brushcontainer{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 10%;
+            margin: 0.4%;
+        }
+        .chatmessage{
+            list-style: none;
+        }
     </style>
 </head>
 <body onload="init()">
     <span class="word" id="word">Cavallo</span>
-    <canvas id="can" width="400" height="400"></canvas>
+    <canvas id="can" width="800" height="600"></canvas>
     <br>
     <div class="colors">
-        <div>Choose Color</div>
-        <div class="color"></div><!-- space placeholder -->
-        
         <div class="color" style="background:black;" id="black" onclick="color(this)"></div>
         <div class="color" style="background:green;" id="green" onclick="color(this)"></div>
         <div class="color" style="background:blue;" id="blue" onclick="color(this)"></div>
@@ -56,6 +80,24 @@
         <div class="color"></div><!-- space placeholder -->
         <div class="color" style="background:white;border:2px solid;" id="white" onclick="color(this)"></div>
         <input type="button" value="clear" id="clr" size="23" onclick="erase()">
+    </div>
+    <div class="brushes">
+        <div class="color"></div><!-- space placeholder -->
+        <div class="brushcontainer" id="small" onclick="brush(this)">
+            <div class="brush" style="width: 2px; height: 2px;"></div>
+        </div>
+        <div class="brushcontainer" id="medium" onclick="brush(this)">
+            <div class="brush" style="width: 4px; height: 4px;"></div>
+        </div>
+        <div class="brushcontainer" id="large" onclick="brush(this)">
+            <div class="brush" style="width: 8px; height: 8px;"></div>
+        </div>
+        <div class="brushcontainer" id="huge" onclick="brush(this)">
+            <div class="brush" style="width: 12px; height: 12px;"></div>
+        </div>
+        <div class="brushcontainer" id="enormous" onclick="brush(this)">
+            <div class="brush" style="width: 16px; height: 16px;"></div>
+        </div>
     </div>
     <ul id="messages"></ul>
     <form id="form" action="">
@@ -86,7 +128,7 @@
         });
     </script>
     <script>
-        var canvas, ctx, flag = false,
+    var canvas, ctx, flag = false,
         prevX = 0,
         currX = 0,
         prevY = 0,
@@ -114,10 +156,9 @@
         canvas.addEventListener("mouseout", function (e) {
             findxy('out', e)
         }, false);
-        
     }
     /**
-     * Function that, given an object with the id
+     * Function that, given an html object with the id
      * representing a color, checks if the color is allowed and
      * if it is, sets it as the current color.
     */
@@ -138,16 +179,13 @@
         if(allowedColors.includes(obj.id)){
             selectedColor = obj.id;
         }
-        //if it's the eraser, make the brush bigger
-        if (selectedColor == "white"){
-            brushSize = 14;
-        }else{
-            brushSize = 2;
-        }
-    
     }
-    function brush(size){
-        switch (size) {
+    /**
+     * Function that, given an html object with the id
+     * representing a brush size, sets the brush size.
+    */
+    function brush(obj){
+        switch (obj.id) {
             case "small":
                 brushSize = 2;
                 break;
@@ -163,8 +201,8 @@
             case "enormous":
                 brushSize = 16;
                 break;
-            case "eraser":
-                brushSize = 14;
+            case "default":
+                brushSize = 2;
                 break;
             default:
                 brushSize = 2;
