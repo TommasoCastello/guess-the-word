@@ -11,6 +11,7 @@ app.get('/', (req, res) => {
 
 class Room{
   constructor(id, owner) {
+    console.log(id, owner);
     this.id = id;
     this.owner = owner;
     this.players = [];
@@ -24,7 +25,7 @@ class Player{
   }
 }
 
-let roomMap = {};
+var roomMap = {};
 
 io.on('connection', (socket, roomId) => {
 
@@ -39,27 +40,29 @@ io.on('connection', (socket, roomId) => {
         socket.emit('alert', "welcome " + playerName + "!");
         roomMap[roomId].players.push(newplayer);
         socket.join(roomId);
+        socket.emit('room joined', roomId);
       }
     }else{
       socket.emit('alert', "room not found");
     }
   });
 
-  socket.on('new room', () => {
+  socket.on('new room', (playerName) => {
     // create new room
-    let roomId = roomMap.length++;
-    while(roomId in roomMap){
-      roomId++;
+    let roomId1 = 0;
+    while(roomId1 in roomMap){
+      roomId1++;
     }
     let owner = new Player(playerName);
-    let newRoom = new Room(roomId, owner);
-    roomMap[roomId] = newRoom;
+    let newRoom = new Room(roomId1, owner);
+    console.log(owner.name + " created room " + roomId1);
+    roomMap[roomId1] = newRoom;
 
     // owner joins new room
-    socket.emit('created room', roomId);
+    socket.emit('created room', roomId1);
   });
-  socket.on('chat message', (msg, roomId) => {
-    io.in(roomId).emit('chat message', msg);
+  socket.on('chat message', (msg, roomId1) => {
+    io.in(roomId1).emit('chat message', msg);
   });
 
 });

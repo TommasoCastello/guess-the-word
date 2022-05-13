@@ -98,8 +98,9 @@
     <section id="login">
         <form name="login" class="loginform">
             <input type="text" name="username" placeholder="Username">
-            <input type="number" name="roomcode" placeholder="Room code">
-            <input type="button" onclick="validateLoginForm()" value="GO">
+            <input type="number" name="roomcode" placeholder="Room code (ignored if you create a room)">
+            <input type="button" onclick="createRoom()" value="CREATE ROOM">
+            <input type="button" onclick="joinRoom()" value="JOIN ROOM">
         </form>
     </section>
     <section id="game" style="display: none;">
@@ -152,18 +153,25 @@
     <script>
         var username;
         var room;
-        function validateLoginForm(){
+        function createRoom(){
+            var usernamein = document.forms["login"]["username"].value;
+            if(usernamein == "" || usernamein == null){
+                alert("Fill in username");
+                return;
+            }
+            username = usernamein;
+            socket.emit('new room', username);
+        }
+        function joinRoom(){
             var usernamein = document.forms["login"]["username"].value;
             var roomcodein = document.forms["login"]["roomcode"].value;
             if (usernamein == "" || roomcodein == "" || usernamein == null || roomcodein == null) {
                 alert("Please fill in all fields");
-            }else{
-                username = usernamein;
-                room = roomcodein;
-                document.getElementById("login").style.display = "none";
-                document.getElementById("game").style.display = "block";
-                socket.emit('join room', room);
+                return;
             }
+            username = usernamein;
+            room = roomcodein;
+            socket.emit('join room', room, username);
         }
         var socket = io();
         var messages = document.getElementById('messages');
@@ -183,7 +191,14 @@
         });
 
         socket.on('created room', function(roomId) {
-            socket.emit('join room', roomId);
+            console.log("created room " + roomId);
+            socket.emit('join room', roomId, username); 
+        });
+
+        socket.on('room joined', function(roomId) {
+            room = roomId;
+            document.getElementById("login").style.display = "none";
+            document.getElementById("game").style.display = "block";
         });
 
         socket.on('chat message', function(msg) {
