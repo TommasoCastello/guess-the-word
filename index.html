@@ -178,7 +178,14 @@
         }
         });
 
-        console.log("test"); // test git
+        socket.on('alert', function(msg) {
+            alert(msg);
+        });
+
+        socket.on('created room', function(roomId) {
+            socket.emit('join room', roomId);
+        });
+
         socket.on('chat message', function(msg) {
             var item = document.createElement('li');
             item.textContent = msg;
