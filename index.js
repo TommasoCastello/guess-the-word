@@ -8,7 +8,6 @@ const maxPlayers = 3;
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
-
 class Room{
   constructor(id, owner) {
     this.id = id;

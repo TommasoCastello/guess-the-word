@@ -5,6 +5,12 @@
         body{
             background-color: rgb(45, 127, 251);
         }
+        /* html, body {
+            overflow-x: hidden;
+        }
+        body {
+            position: relative;
+        } */
         canvas{
             padding-left: 0;
             padding-right: 0;
@@ -98,8 +104,9 @@
     <section id="login">
         <form name="login" class="loginform">
             <input type="text" name="username" placeholder="Username">
-            <input type="number" name="roomcode" placeholder="Room code">
-            <input type="button" onclick="validateLoginForm()" value="GO">
+            <input type="number" name="roomcode" placeholder="Room code (ignored if you create a room)">
+            <input type="button" onclick="createRoom()" value="CREATE ROOM">
+            <input type="button" onclick="joinRoom()" value="JOIN ROOM">
         </form>
     </section>
     <section id="game" style="display: none;">
@@ -152,19 +159,27 @@
     <script>
         var username;
         var room;
-        function validateLoginForm(){
+        function createRoom(){
+            var usernamein = document.forms["login"]["username"].value;
+            if(usernamein == "" || usernamein == null){
+                alert("Fill in username");
+                return;
+            }
+            username = usernamein;
+            soket.emit('create room');
+        }
+        function joinRoom(){
             var usernamein = document.forms["login"]["username"].value;
             var roomcodein = document.forms["login"]["roomcode"].value;
             if (usernamein == "" || roomcodein == "" || usernamein == null || roomcodein == null) {
                 alert("Please fill in all fields");
-            }else{
-                username = usernamein;
-                room = roomcodein;
-                document.getElementById("login").style.display = "none";
-                document.getElementById("game").style.display = "block";
-                socket.emit('join room', room);
+                return;
             }
+            username = usernamein;
+            room = roomcodein;
+            socket.emit('join room', room);
         }
+        
         var socket = io();
         var messages = document.getElementById('messages');
         var form = document.getElementById('form');
@@ -178,12 +193,9 @@
         }
         });
 
-        socket.on('alert', function(msg) {
-            alert(msg);
-        });
-
-        socket.on('created room', function(roomId) {
-            socket.emit('join room', roomId);
+        socket.on('room joined', function() {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("game").style.display = "block";
         });
 
         socket.on('chat message', function(msg) {
@@ -209,7 +221,8 @@
         ctx = canvas.getContext("2d");
         w = canvas.width;
         h = canvas.height;
-    
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, w, h);
         canvas.addEventListener("mousemove", function (e) {
             findxy('move', e)
         }, false);
