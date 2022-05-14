@@ -92,6 +92,64 @@
             cursor: pointer;
             box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
         }
+        .topnav {
+            position: relative;
+            overflow: hidden;
+            background-color: #333;
+            margin-bottom: 10px;
+            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        }
+        .topnav a {
+            float: left;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+        .topnav a.active {
+            background-color: #06F;
+            color: white;
+            font-size: 2em;
+        }
+        .topnav-centered a {
+            float: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .topnav-right {
+            float: right;
+        }
+        .topnavbutton{
+            float: left;
+            color: #f2f2f2;
+            background-color: #333;
+            text-align: center;
+            padding: 14px 16px;
+            border: none;
+        }
+        .topnavbutton:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        /* Responsive navigation menu (for mobile devices) */
+        @media screen and (max-width: 800px) {
+
+            .topnav a,
+            .topnav-right {
+                float: none;
+                display: block;
+            }
+
+            .topnav-centered a {
+                position: relative;
+                top: 0;
+                left: 0;
+                transform: none;
+            }
+        }
     </style>
 </head>
 <body onload="init()">
@@ -104,7 +162,26 @@
         </form>
     </section>
     <section id="game" style="display: none;">
-        <span class="word" id="word">Cavallo</span>
+        <!-- Top navigation -->
+        <div class="topnav">
+
+            <!-- Centered link -->
+            <div class="topnav-centered">
+                <a class="active" id="word">XXXXX</a>
+            </div>
+
+            <!-- Left-aligned links (default) -->
+            <a class="topnavbutton" onclick="leaveRoom()">LEAVE ROOM</a>
+            <a class="topnavbutton" onclick="destroyRoom()">DESTROY ROOM</a>
+            <a id="room">XXXXX</a>
+
+            <!-- Right-aligned links -->
+            <div class="topnav-right">
+                <a id="time">XXXXX</a>
+            </div>
+
+        </div>
+        <ul id="players"></ul>
         <canvas id="can" width="800" height="600"></canvas>
         <br>
         <div class="colors">
@@ -181,7 +258,7 @@
         form.addEventListener('submit', function(e) {
         e.preventDefault();
         if (input.value) {
-            socket.emit('chat message', input.value, room);
+            socket.emit('chat message', input.value, room, username);
             input.value = '';
         }
         });
@@ -197,16 +274,46 @@
 
         socket.on('room joined', function(roomId) {
             room = roomId;
+            console.log("joined room " + roomId);
             document.getElementById("login").style.display = "none";
             document.getElementById("game").style.display = "block";
+            document.getElementById("room").innerText = roomId;
+            document.getElementById("word").innerText = "XXXXX";
+            document.getElementById("time").innerText = "";
+            // window.onbeforeunload = function() {
+            //     return true;
+            // };
+            // window.onunload = function() {
+            //     socket.emit('leave room', room, username);
+            // };
         });
-
+        socket.on('player updated', function(players) {
+            var playerslist = document.getElementById("players");
+            playerslist.innerHTML = "";
+            for (var i = 0; i < players.length; i++) {
+                var player = document.createElement("li");
+                player.innerText = players[i].name + " - " + players[i].points;
+                playerslist.appendChild(player);
+            }
+        });
         socket.on('chat message', function(msg) {
+            console.log(msg);
             var item = document.createElement('li');
             item.textContent = msg;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });
+        socket.on('room destroyed', function(){
+            console.log("i am destroyed");
+            window.location.reload();
+        });
+        function leaveRoom(){
+            socket.emit('leave room', room, username);
+            window.location.reload();
+        }
+        function destroyRoom(){
+            socket.emit('destroy room', room, username);
+        }
     </script>
     <script>
     var canvas, ctx, flag = false,
