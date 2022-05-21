@@ -58,6 +58,13 @@
         #messages > li{
             list-style: none;
         }
+        #messages{
+            max-height: 20vh;
+            overflow-y: scroll;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
         .loginform{
             border-radius: 2%;
             margin-top: 20vh;
@@ -178,6 +185,7 @@
             <!-- Right-aligned links -->
             <div class="topnav-right">
                 <a id="time">XXXXX</a>
+                <a id="drawer">XXXXX</a>
             </div>
 
         </div>
@@ -230,6 +238,7 @@
     <script>
         var username;
         var room;
+        var currentDrawer;
         function createRoom(){
             var usernamein = document.forms["login"]["username"].value;
             if(usernamein == "" || usernamein == null){
@@ -280,12 +289,7 @@
             document.getElementById("room").innerText = roomId;
             document.getElementById("word").innerText = "XXXXX";
             document.getElementById("time").innerText = "";
-            // window.onbeforeunload = function() {
-            //     return true;
-            // };
-            // window.onunload = function() {
-            //     socket.emit('leave room', room, username);
-            // };
+            socket.emit('get drawer', room);
         });
         socket.on('player updated', function(players) {
             var playerslist = document.getElementById("players");
@@ -301,11 +305,41 @@
             var item = document.createElement('li');
             item.textContent = msg;
             messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
+            messages.scrollTo(0, messages.scrollHeight);
         });
         socket.on('room destroyed', function(){
             console.log("i am destroyed");
             window.location.reload();
+        });
+        socket.on('draw canvas', function(data){
+            var ctx = document.getElementById("can").getContext("2d");
+            if(data.type == "erase"){
+                ctx.clearRect(0, 0, w, h);
+            }
+            switch(data.type){
+                case 'erase':
+                    ctx.clearRect(0, 0, w, h);
+                    break;
+                case 'fill':
+                    ctx.fillStyle = data.color;
+                    ctx.fillRect(0, 0, w, h);
+                    break;
+                case 'draw':
+                    ctx.beginPath();
+                    ctx.lineCap = "round";
+                    ctx.strokeStyle = data.color;
+                    ctx.lineWidth = data.size;
+                    ctx.lineJoin = "round";
+                    ctx.moveTo(data.x, data.y);
+                    ctx.lineTo(data.x1, data.y1);
+                    ctx.stroke();
+                    break;
+            }
+            
+        });
+        socket.on('current drawer', function(drawer){
+            currentDrawer = drawer;
+            document.getElementById("drawer").innerText = drawer;
         });
         function leaveRoom(){
             socket.emit('leave room', room, username);
@@ -398,6 +432,17 @@
         }
     }
     function draw() {
+        socket.emit('client canvas update', {
+            x: currX,
+            y: currY,
+            x1: prevX,
+            y1: prevY,
+            color: selectedColor,
+            size: brushSize,
+            room: String(room),
+            username: username,
+            type: "draw"
+        });
         ctx.beginPath();
         ctx.lineCap = "round";
         ctx.strokeStyle = selectedColor;
@@ -408,17 +453,41 @@
         ctx.stroke();
         ctx.closePath();
     }
-    /**
-     * Function that clears the canvas after asking confirmation
-     * from the user.
-    */
     function erase() {
+        if(username != currentDrawer){
+            return;
+        }
         if (confirm("Sicuro di voler fare un clear?")) {
+            socket.emit('client canvas update', {
+                x: currX,
+                y: currY,
+                x1: prevX,
+                y1: prevY,
+                color: selectedColor,
+                size: brushSize,
+                room: String(room),
+                username: username,
+                type: "erase"
+            });
             ctx.clearRect(0, 0, w, h);
         }
     }
     function fillbg(){
+        if(username != currentDrawer){
+            return;
+        }
         if (confirm("Sicuro di voler fare un fill " + selectedColor +"?")) {
+            socket.emit('client canvas update', {
+                x: currX,
+                y: currY,
+                x1: prevX,
+                y1: prevY,
+                color: selectedColor,
+                size: brushSize,
+                room: String(room),
+                username: username,
+                type: "fill"
+            });
             ctx.fillStyle = selectedColor;
             ctx.fillRect(0, 0, w, h);
         }
@@ -431,6 +500,9 @@
     }
     
     function findxy(res, e) {
+        if(username != currentDrawer){
+            return;
+        }
         if (res == 'down') {
             prevX = currX;
             prevY = currY;
@@ -439,13 +511,13 @@
     
             flag = true;
             dot_flag = true;
-            if (dot_flag) {
-                ctx.beginPath();
-                ctx.fillStyle = selectedColor;
-                ctx.fillRect(currX, currY, 2, 2);
-                ctx.closePath();
-                dot_flag = false;
-            }
+            // if (dot_flag) {
+            //     ctx.beginPath();
+            //     ctx.fillStyle = selectedColor;
+            //     ctx.fillRect(currX, currY, 2, 2);
+            //     ctx.closePath();
+            //     dot_flag = false;
+            // }
         }
         if (res == 'up' || res == "out") {
             flag = false;

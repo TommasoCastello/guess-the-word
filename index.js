@@ -15,6 +15,8 @@ class Room{
     this.id = id;
     this.owner = owner;
     this.players = [];
+    this.currentDrawer = owner;
+    this.started = false;
   }
 }
 
@@ -64,7 +66,6 @@ io.on('connection', (socket, roomId) => {
     socket.emit('created room', roomId1);
   });
   socket.on('chat message', (msg, roomId1, username) => {
-    console.log("socket => " + username + ": " + msg);
     io.in(String(roomId1)).emit('chat message', (username + ": " + msg));
   });
   socket.on('leave room', (room, user) => {
@@ -92,6 +93,23 @@ io.on('connection', (socket, roomId) => {
     }
     io.in(room).emit('room destroyed');
     delete roomMap[room];//idk if this works, copilot did it
+  });
+  socket.on('client canvas update', (data) => {
+    if(!(data.room in roomMap)){
+      socket.emit('alert', "room not found");
+      return;
+    }
+    if(data.username != roomMap[data.room].currentDrawer.name){
+      return;
+    }
+    io.in(data.room).emit('draw canvas', data);
+  });
+  socket.on('get drawer', (room) => {
+    if(!(room in roomMap)){
+      socket.emit('alert', "room not found");
+      return;
+    }
+    socket.emit('current drawer', roomMap[room].currentDrawer.name);
   });
 });
 
