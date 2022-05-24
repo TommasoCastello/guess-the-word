@@ -2,7 +2,8 @@ const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const port = process.env.PORT || 3000;
-
+const fs = require('fs');
+const words = JSON.parse(fs.readFileSync('words.json', 'utf8'));
 const maxPlayers = 3;
 
 app.get('/', (req, res) => {
@@ -17,6 +18,9 @@ class Room{
     this.players = [];
     this.currentDrawer = owner;
     this.started = false;
+    this.currentRound = 0;
+    this.current3Words = [];
+    this.currentWord = '';
   }
 }
 
@@ -38,6 +42,8 @@ io.on('connection', (socket, roomId) => {
         socket.emit('alert', "name already in use");
       }else if(roomMap[roomId].players.length >= maxPlayers){
         socket.emit('alert', "room full");
+      }else if(roomMap[roomId].started){
+        socket.emit('alert', "game already started, wait for it to end");
       }else{
         socket.emit('alert', "welcome " + playerName + "!");
         roomMap[roomId].players.push(newplayer);
@@ -110,6 +116,40 @@ io.on('connection', (socket, roomId) => {
       return;
     }
     socket.emit('current drawer', roomMap[room].currentDrawer.name);
+  });
+  socket.on('start game' , (room) => {
+    if(!(room in roomMap)){
+      socket.emit('alert', "room not found");
+      return;
+    }
+    if(roomMap[room].started){
+      socket.emit('alert', "game already started");
+      return;
+    }
+    roomMap[room].started = true;
+    roomMap[room].currentRound = 0;
+    io.in(room).emit('game started');
+  });
+  socket.on('words request', (room) => {
+    room = String(room);
+    if(!(room in roomMap)){
+      socket.emit('alert', "room not found");
+      return;
+    }
+    roomMap[room].current3Words = [
+      words[parseInt(Math.random() * words.length)],
+      words[parseInt(Math.random() * words.length)],
+      words[parseInt(Math.random() * words.length)]
+    ];
+    socket.emit('words', roomMap[room].current3Words);
+  });
+  socket.on('word picked', (room, wordIndex) => {
+    if(!(room in roomMap)){
+      socket.emit('alert', "room not found");
+      return;
+    }
+    roomMap[room].currentWord = roomMap[room].current3Words[wordIndex&3];
+    io.in(room).emit('word picked', roomMap[room].currentWord);
   });
 });
 

@@ -4,6 +4,7 @@
     <style>
         body{
             background-color: rgb(45, 127, 251);
+            overflow: hidden;
         }
         canvas{
             padding-left: 0;
@@ -291,6 +292,9 @@
             document.getElementById("time").innerText = "";
             socket.emit('get drawer', room);
         });
+        socket.on('words', function(words){
+            console.log(words);
+        });
         socket.on('player updated', function(players) {
             var playerslist = document.getElementById("players");
             playerslist.innerHTML = "";
@@ -313,12 +317,12 @@
         });
         socket.on('draw canvas', function(data){
             var ctx = document.getElementById("can").getContext("2d");
-            if(data.type == "erase"){
-                ctx.clearRect(0, 0, w, h);
-            }
             switch(data.type){
                 case 'erase':
-                    ctx.clearRect(0, 0, w, h);
+                    let tmp = ctx.fillStyle;
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.fillStyle = tmp;
                     break;
                 case 'fill':
                     ctx.fillStyle = data.color;
@@ -341,6 +345,7 @@
             currentDrawer = drawer;
             document.getElementById("drawer").innerText = drawer;
         });
+
         function leaveRoom(){
             socket.emit('leave room', room, username);
             window.location.reload();
@@ -378,6 +383,10 @@
         canvas.addEventListener("mouseout", function (e) {
             findxy('out', e)
         }, false);
+        let tmp = ctx.fillStyle;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = tmp;
     }
     /**
      * Function that, given an html object with the id
@@ -469,7 +478,10 @@
                 username: username,
                 type: "erase"
             });
-            ctx.clearRect(0, 0, w, h);
+            let tmp = ctx.fillStyle;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = tmp;
         }
     }
     function fillbg(){
@@ -493,10 +505,10 @@
         }
     }
     function save() {
-        document.getElementById("canvasimg").style.border = "2px solid";
-        var dataURL = canvas.toDataURL();
-        //document.getElementById("canvasimg").src = dataURL;
-        //document.getElementById("canvasimg").style.display = "inline";
+        var link = document.createElement('a');
+        link.download = 'untitled.jpg';
+        link.href = document.getElementById('can').toDataURL("image/jpg");
+        link.click();
     }
     
     function findxy(res, e) {
