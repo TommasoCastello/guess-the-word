@@ -18,9 +18,11 @@ class Room{
     this.players = [];
     this.currentDrawer = owner;
     this.started = false;
-    this.currentRound = 0;
+    this.currentRound = -1;
     this.current3Words = [];
     this.currentWord = '';
+    this.timeLeft = 80;
+    this.timer;
   }
 }
 
@@ -117,7 +119,7 @@ io.on('connection', (socket, roomId) => {
     }
     socket.emit('current drawer', roomMap[room].currentDrawer.name);
   });
-  socket.on('start game' , (room) => {
+  socket.on('start game' , (room, owner) => {
     if(!(room in roomMap)){
       socket.emit('alert', "room not found");
       return;
@@ -126,9 +128,15 @@ io.on('connection', (socket, roomId) => {
       socket.emit('alert', "game already started");
       return;
     }
+    console.log(roomMap[room].owner.name);
+    if(String(owner) != String(roomMap[room].owner.name)){
+      socket.emit('alert', "u have to be the owner to start the game");
+      return;
+    }
     roomMap[room].started = true;
     roomMap[room].currentRound = 0;
-    io.in(room).emit('game started');
+    roomMap[room].current3Words = getRandomWords();
+    socket.emit('words', roomMap[room].current3Words);
   });
   socket.on('words request', (room) => {
     room = String(room);
@@ -136,11 +144,7 @@ io.on('connection', (socket, roomId) => {
       socket.emit('alert', "room not found");
       return;
     }
-    roomMap[room].current3Words = [
-      words[parseInt(Math.random() * words.length)],
-      words[parseInt(Math.random() * words.length)],
-      words[parseInt(Math.random() * words.length)]
-    ];
+    roomMap[room].current3Words = getRandomWords();
     socket.emit('words', roomMap[room].current3Words);
   });
   socket.on('word picked', (room, wordIndex) => {
@@ -149,9 +153,32 @@ io.on('connection', (socket, roomId) => {
       return;
     }
     roomMap[room].currentWord = roomMap[room].current3Words[wordIndex&3];
-    io.in(room).emit('word picked', roomMap[room].currentWord);
+    startRound(room);
   });
 });
+
+function startRound(room){
+  roomMap[room].currentRound++;
+  roomMap[room].currentDrawer = roomMap[room].players[roomMap[room].currentRound%maxPlayers];
+  roomMap[room].timer = setInterval(function() {
+    if(roomMap[room].timeLeft == 0){
+      // end round
+      clearInterval(roomMap[room].timer);
+      roomMap[room].timeLeft = 80;
+    }
+    roomMap[room].timeLeft--;
+    io.sockets.emit('timer', { countdown: roomMap[room].timeLeft });
+  }, 1000);
+}
+
+function getRandomWords(){
+  let threeWords = [];
+  for(let i = 0; i < 3; i++){
+    threeWords.push(words[parseInt(Math.random() * words.length)]);
+  }
+  return threeWords;
+}
+
 
 function nameAlreadyInUse(playerArray, name){
   playerArray.forEach(playerInGame => {

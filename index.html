@@ -194,6 +194,7 @@
         <canvas id="can" width="800" height="600"></canvas>
         <br>
         <div class="colors">
+            <div id="counter"></div>
             <div class="color" style="background:black;" id="black" onclick="color(this)"></div>
             <div class="color" style="background:green;" id="green" onclick="color(this)"></div>
             <div class="color" style="background:blue;" id="blue" onclick="color(this)"></div>
@@ -344,6 +345,10 @@
         socket.on('current drawer', function(drawer){
             currentDrawer = drawer;
             document.getElementById("drawer").innerText = drawer;
+        });
+
+        socket.on('timer', function (data) {
+            document.getElementById('counter').innerHTML = data.countdown;
         });
 
         function leaveRoom(){
@@ -544,6 +549,7 @@
             }
         }
     }
+
     </script>
 </body>
 </html>
