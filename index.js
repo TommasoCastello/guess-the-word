@@ -5,6 +5,7 @@ const port = process.env.PORT || 3000;
 const fs = require('fs');
 const words = JSON.parse(fs.readFileSync('words.json', 'utf8'));
 const maxPlayers = 3;
+const defaultTime = 10;
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
@@ -21,7 +22,7 @@ class Room{
     this.currentRound = -1;
     this.current3Words = [];
     this.currentWord = '';
-    this.timeLeft = 80;
+    this.timeLeft = defaultTime;
     this.timer;
   }
 }
@@ -65,6 +66,7 @@ io.on('connection', (socket, roomId) => {
     while(roomId1 in roomMap){
       roomId1++;
     }
+    roomId1 = String(roomId1);
     let owner = new Player(playerName);
     let newRoom = new Room(String(roomId1), owner);
     console.log(owner.name + " created room " + roomId1);
@@ -103,6 +105,7 @@ io.on('connection', (socket, roomId) => {
     delete roomMap[room];//idk if this works, copilot did it
   });
   socket.on('client canvas update', (data) => {
+    data.room = String(data.room);
     if(!(data.room in roomMap)){
       socket.emit('alert', "room not found");
       return;
@@ -134,7 +137,6 @@ io.on('connection', (socket, roomId) => {
       return;
     }
     roomMap[room].started = true;
-    roomMap[room].currentRound = 0;
     roomMap[room].current3Words = getRandomWords();
     socket.emit('words', roomMap[room].current3Words);
   });
@@ -147,27 +149,40 @@ io.on('connection', (socket, roomId) => {
     roomMap[room].current3Words = getRandomWords();
     socket.emit('words', roomMap[room].current3Words);
   });
-  socket.on('word picked', (room, wordIndex) => {
+  socket.on('word picked', (room, username, wordIndex) => {
     if(!(room in roomMap)){
       socket.emit('alert', "room not found");
       return;
     }
+    if(username != roomMap[room].currentDrawer.name){
+      return;
+    }
     roomMap[room].currentWord = roomMap[room].current3Words[wordIndex&3];
-    startRound(room);
+    socket.emit('full word for drawer', roomMap[room].currentWord);
+    console.log("picked word "+roomMap[room].currentWord);
+    startRound(room, socket);
   });
 });
 
-function startRound(room){
+function startRound(room, socket){
+  if(!(room in roomMap)){
+    socket.emit('alert', "room not found");
+    return;
+  }
   roomMap[room].currentRound++;
-  roomMap[room].currentDrawer = roomMap[room].players[roomMap[room].currentRound%maxPlayers];
+  roomMap[room].currentDrawer = roomMap[room].players[roomMap[room].currentRound%(roomMap[room].players.length)];
+  //console.log(roomMap[room]);
+  socket.emit('current drawer', roomMap[room].currentDrawer.name);
   roomMap[room].timer = setInterval(function() {
     if(roomMap[room].timeLeft == 0){
       // end round
       clearInterval(roomMap[room].timer);
-      roomMap[room].timeLeft = 80;
+      roomMap[room].timeLeft = defaultTime;
+      io.in(room).emit('time up', roomMap[room].currentWord);
+    }else{
+      roomMap[room].timeLeft--;
+      io.in(room).emit('timer', { countdown: roomMap[room].timeLeft });
     }
-    roomMap[room].timeLeft--;
-    io.sockets.emit('timer', { countdown: roomMap[room].timeLeft });
   }, 1000);
 }
 

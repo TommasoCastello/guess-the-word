@@ -158,6 +158,37 @@
                 transform: none;
             }
         }
+        #chooseword{
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            padding-top: 0.5%;
+            padding-bottom: 0.5%;
+            margin-top: 0.5%;
+            margin-bottom: 0.5%;
+            overflow: hidden;
+            background-color: #333;
+            width: 50%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #chooseword li {
+            float: left;
+            width: 33%;
+        }
+        #chooseword li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        #chooseword li a:hover {
+            background-color: #111;
+        }
+        #choosewordtitle{
+            text-align: center;
+        }
     </style>
 </head>
 <body onload="init()">
@@ -181,16 +212,25 @@
             <!-- Left-aligned links (default) -->
             <a class="topnavbutton" onclick="leaveRoom()">LEAVE ROOM</a>
             <a class="topnavbutton" onclick="destroyRoom()">DESTROY ROOM</a>
-            <a id="room">XXXXX</a>
+            <a id="startgamebutton" class="topnavbutton" style="display: none;" onclick="startGame()">START GAME</a>
 
             <!-- Right-aligned links -->
             <div class="topnav-right">
+                <a id="room">XXXXX</a>
                 <a id="time">XXXXX</a>
                 <a id="drawer">XXXXX</a>
             </div>
 
         </div>
         <ul id="players"></ul>
+        <div id="choosewordcontainer" style="display: none;">
+            <h1 id="choosewordtitle">Choose a word</h1>
+            <ul id="chooseword">
+                <li><a id="cw1" onclick="sendWordChoice(0)">XX</a></li>
+                <li><a id="cw2" onclick="sendWordChoice(1)">XX</a></li>
+                <li><a id="cw3" onclick="sendWordChoice(2)">XX</a></li>
+            </ul>
+        </div>
         <canvas id="can" width="800" height="600"></canvas>
         <br>
         <div class="colors">
@@ -248,6 +288,7 @@
                 return;
             }
             username = usernamein;
+            document.getElementById('startgamebutton').style.display = "block";
             socket.emit('new room', username);
         }
         function joinRoom(){
@@ -288,13 +329,10 @@
             console.log("joined room " + roomId);
             document.getElementById("login").style.display = "none";
             document.getElementById("game").style.display = "block";
-            document.getElementById("room").innerText = roomId;
+            document.getElementById("room").innerText = "Room "+roomId;
             document.getElementById("word").innerText = "XXXXX";
-            document.getElementById("time").innerText = "";
+            document.getElementById("time").innerText = "XX";
             socket.emit('get drawer', room);
-        });
-        socket.on('words', function(words){
-            console.log(words);
         });
         socket.on('player updated', function(players) {
             var playerslist = document.getElementById("players");
@@ -316,7 +354,14 @@
             console.log("i am destroyed");
             window.location.reload();
         });
+        socket.on('words', function (words) {
+            document.getElementById("cw1").innerText = words[0];
+            document.getElementById("cw2").innerText = words[1];
+            document.getElementById("cw3").innerText = words[2];
+            document.getElementById("choosewordcontainer").style.display = "block";
+        });
         socket.on('draw canvas', function(data){
+            console.log(data);
             var ctx = document.getElementById("can").getContext("2d");
             switch(data.type){
                 case 'erase':
@@ -348,15 +393,31 @@
         });
 
         socket.on('timer', function (data) {
-            document.getElementById('counter').innerHTML = data.countdown;
+            console.log(data.countdown);
+            document.getElementById('time').innerText = data.countdown;
         });
-
+        socket.on('time up', function (word) {
+            document.getElementById('time').innerText = "Time's up!";
+            document.getElementById('word').innerText = word;
+            currentDrawer = "";//prevents drawing for everyone
+        });
+        socket.on('full word for drawer', function (word) {
+            document.getElementById('word').innerText = word;
+        });
         function leaveRoom(){
             socket.emit('leave room', room, username);
             window.location.reload();
         }
         function destroyRoom(){
             socket.emit('destroy room', room, username);
+        }
+        function startGame(){
+            document.getElementById('startgamebutton').style.display = 'none';
+            socket.emit('start game', room, username);
+        }
+        function sendWordChoice(index){
+            document.getElementById('choosewordcontainer').style.display = 'none';
+            socket.emit('word picked', room, username, parseInt(index));
         }
     </script>
     <script>
