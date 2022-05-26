@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <style>
-        body{
+        body {
             background-color: rgb(45, 127, 251);
             overflow: hidden;
         }
-        canvas{
+
+        canvas {
             padding-left: 0;
             padding-right: 0;
             margin-left: auto;
@@ -15,17 +17,20 @@
             border: 2px solid;
             background-color: white;
         }
-        .colors{
+
+        .colors {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
         }
-        .color{
+
+        .color {
             width: 25px;
             height: 25px;
         }
-        .word{
+
+        .word {
             padding: 0.4%;
             font-size: 1.5em;
             font-weight: bold;
@@ -35,17 +40,20 @@
             background-color: white;
             border-radius: 5%;
         }
-        .brushes{
+
+        .brushes {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
         }
-        .brush{
+
+        .brush {
             border-radius: 50%;
             background-color: black;
         }
-        .brushcontainer{
+
+        .brushcontainer {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -56,17 +64,21 @@
             border-radius: 10%;
             margin: 0.4%;
         }
-        #messages > li{
+
+        #messages>li {
             list-style: none;
         }
-        #messages{
+
+        #messages {
             max-height: 20vh;
             overflow-y: scroll;
         }
+
         ::-webkit-scrollbar {
             display: none;
         }
-        .loginform{
+
+        .loginform {
             border-radius: 2%;
             margin-top: 20vh;
             margin-left: auto;
@@ -77,7 +89,8 @@
             text-align: center;
             box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
         }
-        .loginform input{
+
+        .loginform input {
             outline: 0;
             background: #f2f2f2;
             width: 100%;
@@ -86,7 +99,8 @@
             padding: 15px;
             box-sizing: border-box;
         }
-        .loginform input[type=button]{
+
+        .loginform input[type=button] {
             text-transform: uppercase;
             outline: 0;
             background: #06F;
@@ -100,6 +114,7 @@
             cursor: pointer;
             box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
         }
+
         .topnav {
             position: relative;
             overflow: hidden;
@@ -107,6 +122,7 @@
             margin-bottom: 10px;
             box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
         }
+
         .topnav a {
             float: left;
             color: #f2f2f2;
@@ -115,11 +131,13 @@
             text-decoration: none;
             font-size: 1.2em;
         }
+
         .topnav a.active {
             background-color: #06F;
             color: white;
             font-size: 2em;
         }
+
         .topnav-centered a {
             float: none;
             position: absolute;
@@ -127,10 +145,12 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+
         .topnav-right {
             float: right;
         }
-        .topnavbutton{
+
+        .topnavbutton {
             float: left;
             color: #f2f2f2;
             background-color: #333;
@@ -138,10 +158,12 @@
             padding: 14px 16px;
             border: none;
         }
+
         .topnavbutton:hover {
             background-color: #ddd;
             color: black;
         }
+
         /* Responsive navigation menu (for mobile devices) */
         @media screen and (max-width: 800px) {
 
@@ -158,7 +180,8 @@
                 transform: none;
             }
         }
-        #chooseword{
+
+        #chooseword {
             list-style-type: none;
             margin: 0;
             padding: 0;
@@ -172,10 +195,12 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         #chooseword li {
             float: left;
             width: 33%;
         }
+
         #chooseword li a {
             display: block;
             color: white;
@@ -183,14 +208,17 @@
             padding: 14px 16px;
             text-decoration: none;
         }
+
         #chooseword li a:hover {
             background-color: #111;
         }
-        #choosewordtitle{
+
+        #choosewordtitle {
             text-align: center;
         }
     </style>
 </head>
+
 <body onload="init()">
     <section id="login">
         <form name="login" class="loginform">
@@ -231,6 +259,9 @@
                 <li><a id="cw3" onclick="sendWordChoice(2)">XX</a></li>
             </ul>
         </div>
+        <!-- <div id="endroundcontainer" style="display: none;">
+            <h1>Time's up! The word was <h1 id="endroundword"></h1></h1>
+        </div> -->
         <canvas id="can" width="800" height="600"></canvas>
         <br>
         <div class="colors">
@@ -268,22 +299,23 @@
             <div class="brushcontainer" id="enormous" onclick="brush(this)">
                 <div class="brush" style="width: 16px; height: 16px;"></div>
             </div>
-                <button onclick="fillbg()">Fill</button>
+            <button onclick="fillbg()">Fill</button>
         </div>
         <ul id="messages"></ul>
         <form id="form" action="">
-        <input id="input" autocomplete="off" /><button>Send</button>
+            <input id="input" autocomplete="off" /><button>Send</button>
         </form>
-        <input type="button" value="save" id="btn" size="30" onclick="save()" style="position:absolute;top:55%;left:10%;">
+        <input type="button" value="save" id="btn" size="30" onclick="save()"
+            style="position:absolute;top:55%;left:10%;">
     </section>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var username;
         var room;
         var currentDrawer;
-        function createRoom(){
+        function createRoom() {
             var usernamein = document.forms["login"]["username"].value;
-            if(usernamein == "" || usernamein == null){
+            if (usernamein == "" || usernamein == null) {
                 alert("Fill in username");
                 return;
             }
@@ -291,7 +323,7 @@
             document.getElementById('startgamebutton').style.display = "block";
             socket.emit('new room', username);
         }
-        function joinRoom(){
+        function joinRoom() {
             var usernamein = document.forms["login"]["username"].value;
             var roomcodein = document.forms["login"]["roomcode"].value;
             if (usernamein == "" || roomcodein == "" || usernamein == null || roomcodein == null) {
@@ -308,33 +340,33 @@
         var input = document.getElementById('input');
         var guessed = false;
 
-        form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (input.value) {
-            socket.emit('chat message', input.value, room, username);
-            input.value = '';
-        }
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', input.value, room, username);
+                input.value = '';
+            }
         });
 
-        socket.on('alert', function(msg) {
+        socket.on('alert', function (msg) {
             alert(msg);
         });
 
-        socket.on('created room', function(roomId) {
+        socket.on('created room', function (roomId) {
             console.log("created room " + roomId);
-            socket.emit('join room', roomId, username); 
+            socket.emit('join room', roomId, username);
         });
 
-        socket.on('room joined', function(roomId) {
+        socket.on('room joined', function (roomId) {
             room = roomId;
             console.log("joined room " + roomId);
             document.getElementById("login").style.display = "none";
             document.getElementById("game").style.display = "block";
-            document.getElementById("room").innerText = "Room "+roomId;
+            document.getElementById("room").innerText = "Room " + roomId;
             document.getElementById("word").innerText = "XXXXX";
             document.getElementById("time").innerText = "XX";
         });
-        socket.on('player updated', function(players) {
+        socket.on('player updated', function (players) {
             var playerslist = document.getElementById("players");
             playerslist.innerHTML = "";
             for (var i = 0; i < players.length; i++) {
@@ -343,7 +375,7 @@
                 playerslist.appendChild(player);
             }
         });
-        socket.on('chat message', function(msgObj) {
+        socket.on('chat message', function (msgObj) {
             console.log(msgObj.msg);
             var item = document.createElement('li');
             item.textContent = msgObj.msg;
@@ -351,7 +383,7 @@
             messages.appendChild(item);
             messages.scrollTo(0, messages.scrollHeight);
         });
-        socket.on('room destroyed', function(){
+        socket.on('room destroyed', function () {
             console.log("i am destroyed");
             window.location.reload();
         });
@@ -362,10 +394,10 @@
             document.getElementById("choosewordcontainer").style.display = "block";
             document.getElementById('input').disabled = true;
         });
-        socket.on('draw canvas', function(data){
+        socket.on('draw canvas', function (data) {
             console.log(data);
             var ctx = document.getElementById("can").getContext("2d");
-            switch(data.type){
+            switch (data.type) {
                 case 'erase':
                     let tmp = ctx.fillStyle;
                     ctx.fillStyle = 'white';
@@ -387,9 +419,9 @@
                     ctx.stroke();
                     break;
             }
-            
+
         });
-        socket.on('current drawer', function(drawer){
+        socket.on('current drawer', function (drawer) {
             currentDrawer = drawer;
             document.getElementById("drawer").innerText = drawer;
         });
@@ -427,7 +459,7 @@
             document.getElementById('word').innerText = word;
         });
         socket.on('word hint', function (word) {
-            if(currentDrawer == username || guessed){
+            if (currentDrawer == username || guessed) {
                 return;
             }
             document.getElementById('word').innerText = word;
@@ -437,158 +469,110 @@
             document.getElementById('input').disabled = true;
             guessed = true;
         });
-        function leaveRoom(){
+        function leaveRoom() {
             socket.emit('leave room', room, username);
             window.location.reload();
         }
-        function destroyRoom(){
+        function destroyRoom() {
             socket.emit('destroy room', room, username);
         }
-        function startGame(){
+        function startGame() {
             document.getElementById('startgamebutton').style.display = 'none';
             socket.emit('start game', room, username);
         }
-        function sendWordChoice(index){
+        function sendWordChoice(index) {
             document.getElementById('choosewordcontainer').style.display = 'none';
             socket.emit('get drawer', room);
             socket.emit('word picked', room, username, parseInt(index));
         }
     </script>
     <script>
-    var canvas, ctx, flag = false,
-        prevX = 0,
-        currX = 0,
-        prevY = 0,
-        currY = 0,
-        dot_flag = false;
+        var canvas, ctx, flag = false,
+            prevX = 0,
+            currX = 0,
+            prevY = 0,
+            currY = 0,
+            dot_flag = false;
 
-    var selectedColor = "black",
-        brushSize = 2;
-    
-    function init() {
-        canvas = document.getElementById('can');
-        ctx = canvas.getContext("2d");
-        w = canvas.width;
-        h = canvas.height;
-    
-        canvas.addEventListener("mousemove", function (e) {
-            findxy('move', e)
-        }, false);
-        canvas.addEventListener("mousedown", function (e) {
-            findxy('down', e)
-        }, false);
-        canvas.addEventListener("mouseup", function (e) {
-            findxy('up', e)
-        }, false);
-        canvas.addEventListener("mouseout", function (e) {
-            findxy('out', e)
-        }, false);
-        let tmp = ctx.fillStyle;
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, w, h);
-        ctx.fillStyle = tmp;
-    }
-    /**
-     * Function that, given an html object with the id
-     * representing a color, checks if the color is allowed and
-     * if it is, sets it as the current color.
-    */
-    function color(obj) {
-        var allowedColors = [
-            "green",
-            "blue",
-            "red",
-            "yellow",
-            "orange",
-            "purple",
-            "pink",
-            "brown",
-            "gray",
-            "black",
-            "white"
-        ];
-        if(allowedColors.includes(obj.id)){
-            selectedColor = obj.id;
-        }
-    }
-    /**
-     * Function that, given an html object with the id
-     * representing a brush size, sets the brush size.
-    */
-    function brush(obj){
-        switch (obj.id) {
-            case "small":
-                brushSize = 2;
-                break;
-            case "medium":
-                brushSize = 4;
-                break;
-            case "large":
-                brushSize = 8;
-                break;
-            case "huge":
-                brushSize = 12;
-                break;
-            case "enormous":
-                brushSize = 16;
-                break;
-            case "default":
-                brushSize = 2;
-                break;
-            default:
-                brushSize = 2;
-                break;
-        }
-    }
-    function draw() {
-        socket.emit('client canvas update', {
-            x: currX,
-            y: currY,
-            x1: prevX,
-            y1: prevY,
-            color: selectedColor,
-            size: brushSize,
-            room: String(room),
-            username: username,
-            type: "draw"
-        });
-        ctx.beginPath();
-        ctx.lineCap = "round";
-        ctx.strokeStyle = selectedColor;
-        ctx.fillStyle = selectedColor;
-        ctx.lineWidth = brushSize;
-        ctx.moveTo(prevX, prevY);
-        ctx.lineTo(currX, currY);
-        ctx.stroke();
-        ctx.closePath();
-    }
-    function erase() {
-        if(username != currentDrawer){
-            return;
-        }
-        if (confirm("Sicuro di voler fare un clear?")) {
-            socket.emit('client canvas update', {
-                x: currX,
-                y: currY,
-                x1: prevX,
-                y1: prevY,
-                color: selectedColor,
-                size: brushSize,
-                room: String(room),
-                username: username,
-                type: "erase"
-            });
+        var selectedColor = "black",
+            brushSize = 2;
+
+        function init() {
+            canvas = document.getElementById('can');
+            ctx = canvas.getContext("2d");
+            w = canvas.width;
+            h = canvas.height;
+
+            canvas.addEventListener("mousemove", function (e) {
+                findxy('move', e)
+            }, false);
+            canvas.addEventListener("mousedown", function (e) {
+                findxy('down', e)
+            }, false);
+            canvas.addEventListener("mouseup", function (e) {
+                findxy('up', e)
+            }, false);
+            canvas.addEventListener("mouseout", function (e) {
+                findxy('out', e)
+            }, false);
             let tmp = ctx.fillStyle;
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, w, h);
             ctx.fillStyle = tmp;
         }
-    }
-    function fillbg(){
-        if(username != currentDrawer){
-            return;
+        /**
+         * Function that, given an html object with the id
+         * representing a color, checks if the color is allowed and
+         * if it is, sets it as the current color.
+        */
+        function color(obj) {
+            var allowedColors = [
+                "green",
+                "blue",
+                "red",
+                "yellow",
+                "orange",
+                "purple",
+                "pink",
+                "brown",
+                "gray",
+                "black",
+                "white"
+            ];
+            if (allowedColors.includes(obj.id)) {
+                selectedColor = obj.id;
+            }
         }
-        if (confirm("Sicuro di voler fare un fill " + selectedColor +"?")) {
+        /**
+         * Function that, given an html object with the id
+         * representing a brush size, sets the brush size.
+        */
+        function brush(obj) {
+            switch (obj.id) {
+                case "small":
+                    brushSize = 2;
+                    break;
+                case "medium":
+                    brushSize = 4;
+                    break;
+                case "large":
+                    brushSize = 8;
+                    break;
+                case "huge":
+                    brushSize = 12;
+                    break;
+                case "enormous":
+                    brushSize = 16;
+                    break;
+                case "default":
+                    brushSize = 2;
+                    break;
+                default:
+                    brushSize = 2;
+                    break;
+            }
+        }
+        function draw() {
             socket.emit('client canvas update', {
                 x: currX,
                 y: currY,
@@ -598,53 +582,102 @@
                 size: brushSize,
                 room: String(room),
                 username: username,
-                type: "fill"
+                type: "draw"
             });
+            ctx.beginPath();
+            ctx.lineCap = "round";
+            ctx.strokeStyle = selectedColor;
             ctx.fillStyle = selectedColor;
-            ctx.fillRect(0, 0, w, h);
+            ctx.lineWidth = brushSize;
+            ctx.moveTo(prevX, prevY);
+            ctx.lineTo(currX, currY);
+            ctx.stroke();
+            ctx.closePath();
         }
-    }
-    function save() {
-        var link = document.createElement('a');
-        link.download = 'untitled.jpg';
-        link.href = document.getElementById('can').toDataURL("image/jpg");
-        link.click();
-    }
-    
-    function findxy(res, e) {
-        if(username != currentDrawer){
-            return;
+        function erase() {
+            if (username != currentDrawer) {
+                return;
+            }
+            if (confirm("Sicuro di voler fare un clear?")) {
+                socket.emit('client canvas update', {
+                    x: currX,
+                    y: currY,
+                    x1: prevX,
+                    y1: prevY,
+                    color: selectedColor,
+                    size: brushSize,
+                    room: String(room),
+                    username: username,
+                    type: "erase"
+                });
+                let tmp = ctx.fillStyle;
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = tmp;
+            }
         }
-        if (res == 'down') {
-            prevX = currX;
-            prevY = currY;
-            currX = e.clientX - canvas.offsetLeft;
-            currY = e.clientY - canvas.offsetTop;
-    
-            flag = true;
-            dot_flag = true;
-            // if (dot_flag) {
-            //     ctx.beginPath();
-            //     ctx.fillStyle = selectedColor;
-            //     ctx.fillRect(currX, currY, 2, 2);
-            //     ctx.closePath();
-            //     dot_flag = false;
-            // }
+        function fillbg() {
+            if (username != currentDrawer) {
+                return;
+            }
+            if (confirm("Sicuro di voler fare un fill " + selectedColor + "?")) {
+                socket.emit('client canvas update', {
+                    x: currX,
+                    y: currY,
+                    x1: prevX,
+                    y1: prevY,
+                    color: selectedColor,
+                    size: brushSize,
+                    room: String(room),
+                    username: username,
+                    type: "fill"
+                });
+                ctx.fillStyle = selectedColor;
+                ctx.fillRect(0, 0, w, h);
+            }
         }
-        if (res == 'up' || res == "out") {
-            flag = false;
+        function save() {
+            var link = document.createElement('a');
+            link.download = 'untitled.jpg';
+            link.href = document.getElementById('can').toDataURL("image/jpg");
+            link.click();
         }
-        if (res == 'move') {
-            if (flag) {
+
+        function findxy(res, e) {
+            if (username != currentDrawer) {
+                return;
+            }
+            if (res == 'down') {
                 prevX = currX;
                 prevY = currY;
                 currX = e.clientX - canvas.offsetLeft;
                 currY = e.clientY - canvas.offsetTop;
-                draw();
+
+                flag = true;
+                dot_flag = true;
+                // if (dot_flag) {
+                //     ctx.beginPath();
+                //     ctx.fillStyle = selectedColor;
+                //     ctx.fillRect(currX, currY, 2, 2);
+                //     ctx.closePath();
+                //     dot_flag = false;
+                // }
+            }
+            if (res == 'up' || res == "out") {
+                flag = false;
+            }
+            if (res == 'move') {
+                if (flag) {
+                    prevX = currX;
+                    prevY = currY;
+                    currX = e.clientX - canvas.offsetLeft;
+                    currY = e.clientY - canvas.offsetTop;
+                    draw();
+                }
             }
         }
-    }
 
     </script>
 </body>
+
 </html>

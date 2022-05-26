@@ -1,6 +1,6 @@
  - [x] Chat guessing
  - [x] Point management
- - [ ] Stop round on guesses
+ - [x] Stop round on guesses
  - [ ] Drawer change
  - [x] Illegal draw management (disable canvas when not started)
  - [x] Clear canvas on drawer change

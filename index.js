@@ -11,7 +11,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-class Room{
+class Room {
   constructor(id, owner) {
     console.log(id, owner);
     this.id = id;
@@ -24,13 +24,14 @@ class Room{
     this.currentWord = '';
     this.guessedCounter = 0;
     this.canvasImages = [];
+    this.wordHint = '';
     this.timeLeft = defaultTime;
     this.timer;
   }
 }
 
-class Player{
-  constructor(name){
+class Player {
+  constructor(name) {
     this.name = name;
     this.points = 0;
   }
@@ -42,14 +43,14 @@ io.on('connection', (socket, roomId) => {
 
   socket.on('join room', (roomId, playerName) => {
     let newplayer = new Player(playerName);
-    if(roomId in roomMap){ // user try to join a game
-      if(nameAlreadyInUse(roomMap[roomId].players, playerName)){
+    if (roomId in roomMap) { // user try to join a game
+      if (nameAlreadyInUse(roomMap[roomId].players, playerName)) {
         socket.emit('alert', "name already in use");
-      }else if(roomMap[roomId].players.length >= maxPlayers){
+      } else if (roomMap[roomId].players.length >= maxPlayers) {
         socket.emit('alert', "room full");
-      }else if(roomMap[roomId].started){
+      } else if (roomMap[roomId].started) {
         socket.emit('alert', "game already started, wait for it to end");
-      }else{
+      } else {
         socket.emit('alert', "welcome " + playerName + "!");
         roomMap[roomId].players.push(newplayer);
         socket.join(String(roomId));
@@ -57,7 +58,7 @@ io.on('connection', (socket, roomId) => {
         console.log(io.sockets.adapter.rooms);
         io.in(String(roomId)).emit('player updated', roomMap[roomId].players);
       }
-    }else{
+    } else {
       socket.emit('alert', "room not found");
     }
   });
@@ -65,7 +66,7 @@ io.on('connection', (socket, roomId) => {
   socket.on('new room', (playerName) => {
     // create new room
     let roomId1 = 0;
-    while(roomId1 in roomMap){
+    while (roomId1 in roomMap) {
       roomId1++;
     }
     roomId1 = String(roomId1);
@@ -79,23 +80,23 @@ io.on('connection', (socket, roomId) => {
   });
   socket.on('chat message', (msg, roomId1, username) => {
     roomId1 = String(roomId1);
-    if(!(roomId1 in roomMap)){
+    if (!(roomId1 in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
     let message = username + ": " + msg;
-    if(!(roomMap[roomId1].started) 
-        || roomMap[roomId1].currentDrawer.name == username){
-      io.in(roomId1).emit('chat message', ({color: 'black', msg: message}));
+    if (!(roomMap[roomId1].started)
+      || roomMap[roomId1].currentDrawer.name == username) {
+      io.in(roomId1).emit('chat message', ({ color: 'black', msg: message }));
       return;
     }
-    if(String(msg).toLowerCase() == String(roomMap[roomId1].currentWord).toLowerCase()){
+    if (String(msg).toLowerCase() == String(roomMap[roomId1].currentWord).toLowerCase()) {
       message = username + "guessed correctly!";
-      io.in(roomId1).emit('chat message', ({color: 'green', msg: message}));
+      io.in(roomId1).emit('chat message', ({ color: 'green', msg: message }));
       socket.emit('guessed correctly', roomMap[roomId1].currentWord);
       //add points to player
       roomMap[roomId1].players.forEach(player => {
-        if(player.name == username){
+        if (player.name == username) {
           player.points += getPoints(roomMap[roomId1]);
           console.log(getPoints(roomMap[roomId1]));
         }
@@ -112,14 +113,14 @@ io.on('connection', (socket, roomId) => {
       //     io.in(roomId1).emit('next round', roomMap[roomId1].currentRound);
       //   }
       // }
-    }else{
-      io.in(roomId1).emit('chat message', ({color: 'black', msg: message}));
+    } else {
+      io.in(roomId1).emit('chat message', ({ color: 'black', msg: message }));
     }
   });
   socket.on('leave room', (room, user) => {
     console.log(user + " disconnected from room " + room);
-    if(room in roomMap){
-      if(user in roomMap[room].players){
+    if (room in roomMap) {
+      if (user in roomMap[room].players) {
         roomMap[room].players.splice(roomMap[room].players.indexOf(user), 1);
         io.in(roomId).emit('player updated', roomMap[roomId].players);
       }
@@ -127,11 +128,11 @@ io.on('connection', (socket, roomId) => {
   });
   socket.on('destroy room', (room, user) => {
     console.log(roomMap[room].players);
-    if(!(room in roomMap)){
+    if (!(room in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    if(roomMap[room].owner.name != user){
+    if (roomMap[room].owner.name != user) {
       socket.emit('alert', "you are not the owner of this room");
       return;
     }
@@ -140,33 +141,33 @@ io.on('connection', (socket, roomId) => {
   });
   socket.on('client canvas update', (data) => {
     data.room = String(data.room);
-    if(!(data.room in roomMap)){
+    if (!(data.room in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    if(data.username != roomMap[data.room].currentDrawer.name){
+    if (data.username != roomMap[data.room].currentDrawer.name) {
       return;
     }
     io.in(data.room).emit('draw canvas', data);
   });
   socket.on('get drawer', (room) => {
-    if(!(room in roomMap)){
+    if (!(room in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
     socket.emit('current drawer', roomMap[room].currentDrawer.name);
   });
-  socket.on('start game' , (room, owner) => {
-    if(!(room in roomMap)){
+  socket.on('start game', (room, owner) => {
+    if (!(room in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    if(roomMap[room].started){
+    if (roomMap[room].started) {
       socket.emit('alert', "game already started");
       return;
     }
     console.log(roomMap[room].owner.name);
-    if(String(owner) != String(roomMap[room].owner.name)){
+    if (String(owner) != String(roomMap[room].owner.name)) {
       socket.emit('alert', "u have to be the owner to start the game");
       return;
     }
@@ -174,31 +175,22 @@ io.on('connection', (socket, roomId) => {
     roomMap[room].current3Words = getRandomWords();
     socket.emit('words', roomMap[room].current3Words);
   });
-  socket.on('words request', (room) => {
-    room = String(room);
-    if(!(room in roomMap)){
-      socket.emit('alert', "room not found");
-      return;
-    }
-    roomMap[room].current3Words = getRandomWords();
-    socket.emit('words', roomMap[room].current3Words);
-  });
   socket.on('word picked', (room, username, wordIndex) => {
-    if(!(room in roomMap)){
+    if (!(room in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    if(username != roomMap[room].currentDrawer.name){
+    if (username != roomMap[room].currentDrawer.name) {
       return;
     }
-    roomMap[room].currentWord = roomMap[room].current3Words[wordIndex&3];
+    roomMap[room].currentWord = roomMap[room].current3Words[wordIndex & 3];
     socket.emit('full word for drawer', roomMap[room].currentWord);
-    console.log("picked word "+roomMap[room].currentWord);
+    console.log("picked word " + roomMap[room].currentWord);
     startRound(room, socket);
   });
   socket.on('canvas data send', (data, room) => {
     room = String(room);
-    if(!(room in roomMap)){
+    if (!(room in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
@@ -206,55 +198,63 @@ io.on('connection', (socket, roomId) => {
   });
 });
 
-function startRound(room, socket){
-  if(!(room in roomMap)){
+function startRound(room, socket) {
+  if (!(room in roomMap)) {
     socket.emit('alert', "room not found");
     return;
   }
   roomMap[room].guessedCounter = 0;
   roomMap[room].currentRound++;
-  roomMap[room].currentDrawer = roomMap[room].players[roomMap[room].currentRound%(roomMap[room].players.length)];
+  roomMap[room].currentDrawer = roomMap[room].players[roomMap[room].currentRound % (roomMap[room].players.length)];
   socket.emit('current drawer', roomMap[room].currentDrawer.name);
-  roomMap[room].timer = setInterval(function() {
-    if(roomMap[room].timeLeft == 0){
+  roomMap[room].timer = setInterval(function () {
+    if (roomMap[room].timeLeft == 0 || roomMap[room].guessedCounter == roomMap[room].players.length - 1) {
       // end round
       clearInterval(roomMap[room].timer);
       roomMap[room].timeLeft = defaultTime;
       io.in(room).emit('time up', roomMap[room].currentWord);
       roomMap[room].currentWord = "";
-    }else{
+    } else {
       roomMap[room].timeLeft--;
-      io.in(room).emit('word hint', "_ ".repeat(roomMap[room].currentWord.length));
+      roomMap[room].wordHint = getWordHint(roomMap[room]);
+      io.in(room).emit('word hint', roomMap[room].wordHint);
       io.in(room).emit('timer', { countdown: roomMap[room].timeLeft });
     }
   }, 1000);
 }
-
-function getRandomWords(){
+// #region Generic functions
+function getRandomWords() {
   let threeWords = [];
-  for(let i = 0; i < 3; i++){
+  for (let i = 0; i < 3; i++) {
     threeWords.push(words[parseInt(Math.random() * words.length)]);
   }
   return threeWords;
 }
-
-
-function nameAlreadyInUse(playerArray, name){
+function nameAlreadyInUse(playerArray, name) {
   playerArray.forEach(playerInGame => {
-    if(playerInGame.name == name){
+    if (playerInGame.name == name) {
       return true;
     }
   });
   return false;
 }
-
-function getPoints(room){
+function getPoints(room) {
   const maxPoints = 1000;
   let players = room.players.length;
   let guessedCounter = room.guessedCounter;
-  const step = maxPoints/players;
-  return Math.floor(maxPoints-(step*guessedCounter));
+  const step = maxPoints / players;
+  return Math.floor(maxPoints - (step * guessedCounter));
 }
+function getWordHint(room) {
+  let word = room.currentWord;
+  let totalTime = defaultTime;
+  let timeLeft = room.timeLeft;
+  let timeElapsed = totalTime - timeLeft;
+  let previousHint = room.wordHint;
+  let showableCharCount = Math.floor(word.length / 2);//only show up to 40% of the word
+  return "_ ".repeat(word.length);
+}
+// #endregion
 http.listen(port, () => {
   console.log(`Socket.IO server running at http://localhost:${port}/`);
 });
