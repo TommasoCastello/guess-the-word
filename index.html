@@ -306,6 +306,7 @@
         var messages = document.getElementById('messages');
         var form = document.getElementById('form');
         var input = document.getElementById('input');
+        var guessed = false;
 
         form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -332,7 +333,6 @@
             document.getElementById("room").innerText = "Room "+roomId;
             document.getElementById("word").innerText = "XXXXX";
             document.getElementById("time").innerText = "XX";
-            socket.emit('get drawer', room);
         });
         socket.on('player updated', function(players) {
             var playerslist = document.getElementById("players");
@@ -343,10 +343,11 @@
                 playerslist.appendChild(player);
             }
         });
-        socket.on('chat message', function(msg) {
-            console.log(msg);
+        socket.on('chat message', function(msgObj) {
+            console.log(msgObj.msg);
             var item = document.createElement('li');
-            item.textContent = msg;
+            item.textContent = msgObj.msg;
+            item.style.color = msgObj.color;
             messages.appendChild(item);
             messages.scrollTo(0, messages.scrollHeight);
         });
@@ -359,6 +360,7 @@
             document.getElementById("cw2").innerText = words[1];
             document.getElementById("cw3").innerText = words[2];
             document.getElementById("choosewordcontainer").style.display = "block";
+            document.getElementById('input').disabled = true;
         });
         socket.on('draw canvas', function(data){
             console.log(data);
@@ -400,9 +402,40 @@
             document.getElementById('time').innerText = "Time's up!";
             document.getElementById('word').innerText = word;
             currentDrawer = "";//prevents drawing for everyone
+            document.getElementById('input').disabled = false;
+            guessed = false;
+            socket.emit('canvas data send',
+                document.getElementById('can').toDataURL("image/jpg"),
+                room);
+            socket.emit('client canvas update', {
+                x: currX,
+                y: currY,
+                x1: prevX,
+                y1: prevY,
+                color: selectedColor,
+                size: brushSize,
+                room: String(room),
+                username: username,
+                type: "erase"
+            });
+            let tmp = ctx.fillStyle;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = tmp;
         });
         socket.on('full word for drawer', function (word) {
             document.getElementById('word').innerText = word;
+        });
+        socket.on('word hint', function (word) {
+            if(currentDrawer == username || guessed){
+                return;
+            }
+            document.getElementById('word').innerText = word;
+        });
+        socket.on('guessed correctly', function (word) {
+            document.getElementById('word').innerText = word;
+            document.getElementById('input').disabled = true;
+            guessed = true;
         });
         function leaveRoom(){
             socket.emit('leave room', room, username);
@@ -417,6 +450,7 @@
         }
         function sendWordChoice(index){
             document.getElementById('choosewordcontainer').style.display = 'none';
+            socket.emit('get drawer', room);
             socket.emit('word picked', room, username, parseInt(index));
         }
     </script>

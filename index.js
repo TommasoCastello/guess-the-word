@@ -22,6 +22,8 @@ class Room{
     this.currentRound = -1;
     this.current3Words = [];
     this.currentWord = '';
+    this.guessedCounter = 0;
+    this.canvasImages = [];
     this.timeLeft = defaultTime;
     this.timer;
   }
@@ -76,7 +78,43 @@ io.on('connection', (socket, roomId) => {
     socket.emit('created room', roomId1);
   });
   socket.on('chat message', (msg, roomId1, username) => {
-    io.in(String(roomId1)).emit('chat message', (username + ": " + msg));
+    roomId1 = String(roomId1);
+    if(!(roomId1 in roomMap)){
+      socket.emit('alert', "room not found");
+      return;
+    }
+    let message = username + ": " + msg;
+    if(!(roomMap[roomId1].started) 
+        || roomMap[roomId1].currentDrawer.name == username){
+      io.in(roomId1).emit('chat message', ({color: 'black', msg: message}));
+      return;
+    }
+    if(String(msg).toLowerCase() == String(roomMap[roomId1].currentWord).toLowerCase()){
+      message = username + "guessed correctly!";
+      io.in(roomId1).emit('chat message', ({color: 'green', msg: message}));
+      socket.emit('guessed correctly', roomMap[roomId1].currentWord);
+      //add points to player
+      roomMap[roomId1].players.forEach(player => {
+        if(player.name == username){
+          player.points += getPoints(roomMap[roomId1]);
+          console.log(getPoints(roomMap[roomId1]));
+        }
+      });
+      roomMap[roomId1].guessedCounter++;
+      io.in(roomId1).emit('player updated', roomMap[roomId1].players);
+      // if(roomMap[roomId1].guessedCounter == roomMap[roomId1].players.length){
+      //   roomMap[roomId1].guessedCounter = 0;
+      //   if(roomMap[roomId1].currentRound == roomMap[roomId1].players.length - 1){
+      //     //TODO HANDLE THIS IN CLIENT
+      //     io.in(roomId1).emit('game ended', roomMap[roomId1].players);
+      //   }else{
+      //     //TODO HANDLE THIS IN CLIENT
+      //     io.in(roomId1).emit('next round', roomMap[roomId1].currentRound);
+      //   }
+      // }
+    }else{
+      io.in(roomId1).emit('chat message', ({color: 'black', msg: message}));
+    }
   });
   socket.on('leave room', (room, user) => {
     console.log(user + " disconnected from room " + room);
@@ -91,10 +129,6 @@ io.on('connection', (socket, roomId) => {
     console.log(roomMap[room].players);
     if(!(room in roomMap)){
       socket.emit('alert', "room not found");
-      return;
-    }
-    if(!(roomMap[room].players.some(player => player.name == user))){
-      socket.emit('alert', "you are not in this room");
       return;
     }
     if(roomMap[room].owner.name != user){
@@ -162,6 +196,14 @@ io.on('connection', (socket, roomId) => {
     console.log("picked word "+roomMap[room].currentWord);
     startRound(room, socket);
   });
+  socket.on('canvas data send', (data, room) => {
+    room = String(room);
+    if(!(room in roomMap)){
+      socket.emit('alert', "room not found");
+      return;
+    }
+    roomMap[room].canvasImages.push(data);
+  });
 });
 
 function startRound(room, socket){
@@ -169,9 +211,9 @@ function startRound(room, socket){
     socket.emit('alert', "room not found");
     return;
   }
+  roomMap[room].guessedCounter = 0;
   roomMap[room].currentRound++;
   roomMap[room].currentDrawer = roomMap[room].players[roomMap[room].currentRound%(roomMap[room].players.length)];
-  //console.log(roomMap[room]);
   socket.emit('current drawer', roomMap[room].currentDrawer.name);
   roomMap[room].timer = setInterval(function() {
     if(roomMap[room].timeLeft == 0){
@@ -179,8 +221,10 @@ function startRound(room, socket){
       clearInterval(roomMap[room].timer);
       roomMap[room].timeLeft = defaultTime;
       io.in(room).emit('time up', roomMap[room].currentWord);
+      roomMap[room].currentWord = "";
     }else{
       roomMap[room].timeLeft--;
+      io.in(room).emit('word hint', "_ ".repeat(roomMap[room].currentWord.length));
       io.in(room).emit('timer', { countdown: roomMap[room].timeLeft });
     }
   }, 1000);
@@ -204,6 +248,13 @@ function nameAlreadyInUse(playerArray, name){
   return false;
 }
 
+function getPoints(room){
+  const maxPoints = 1000;
+  let players = room.players.length;
+  let guessedCounter = room.guessedCounter;
+  const step = maxPoints/players;
+  return Math.floor(maxPoints-(step*guessedCounter));
+}
 http.listen(port, () => {
   console.log(`Socket.IO server running at http://localhost:${port}/`);
 });

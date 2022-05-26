@@ -1,9 +1,11 @@
- - [ ] Chat guessing
- - [ ] Point management
+ - [x] Chat guessing
+ - [x] Point management
+ - [ ] Stop round on guesses
  - [ ] Drawer change
- - [ ] Illegal draw management (disable canvas when not started)
- - [ ] Clear canvas on drawer change
- - [ ] Server save image on round end
- - [ ] Winner screen
+ - [x] Illegal draw management (disable canvas when not started)
+ - [x] Clear canvas on drawer change
+ - [x] Server save image on round end
+ - [ ] Scoreboard
  - [ ] Room destroyment management
  - [ ] Room leave management
+ - [ ] Show hints
