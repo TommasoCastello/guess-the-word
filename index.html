@@ -3,11 +3,20 @@
 
 <head>
     <style>
+        @keyframes fadein {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
         body {
             background-color: rgb(45, 127, 251);
             overflow: hidden;
         }
-
+        #login{
+            -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+            -moz-animation: fadein 1s; /* Firefox < 16 */
+            -o-animation: fadein 1s; /* Opera < 12.1 */
+            animation: fadein 1s;
+        }
         canvas {
             padding-left: 0;
             padding-right: 0;
@@ -225,11 +234,18 @@
         }
 
         #chooseword li a:hover {
-            background-color: #111;
+            background-color: rgb(215, 215, 215);
+            color: #111;
         }
 
         #choosewordtitle {
             text-align: center;
+        }
+        #form{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
@@ -249,19 +265,19 @@
 
             <!-- Centered link -->
             <div class="topnav-centered">
-                <a class="active" id="word">XXXXX</a>
+                <a class="active" id="word">GUESS THE WORD</a>
             </div>
 
             <!-- Left-aligned links (default) -->
             <a class="topnavbutton" onclick="leaveRoom()">LEAVE ROOM</a>
-            <a class="topnavbutton" onclick="destroyRoom()">DESTROY ROOM</a>
+            <!-- <a class="topnavbutton" onclick="destroyRoom()">DESTROY ROOM</a> -->
             <a id="startgamebutton" class="topnavbutton" style="display: none;" onclick="startGame()">START GAME</a>
 
             <!-- Right-aligned links -->
             <div class="topnav-right">
-                <a id="room">XXXXX</a>
-                <a id="time">XXXXX</a>
-                <a id="drawer">XXXXX</a>
+                <a id="room"></a>
+                <a id="time"></a>
+                <a id="drawer"></a>
             </div>
 
         </div>
@@ -269,9 +285,9 @@
         <div id="choosewordcontainer" style="display: none;">
             <h1 id="choosewordtitle">Choose a word</h1>
             <ul id="chooseword">
-                <li><a id="cw1" onclick="sendWordChoice(0)">XX</a></li>
-                <li><a id="cw2" onclick="sendWordChoice(1)">XX</a></li>
-                <li><a id="cw3" onclick="sendWordChoice(2)">XX</a></li>
+                <li><a id="cw1" onclick="sendWordChoice(0)"></a></li>
+                <li><a id="cw2" onclick="sendWordChoice(1)"></a></li>
+                <li><a id="cw3" onclick="sendWordChoice(2)"></a></li>
             </ul>
         </div>
         <!-- <div id="endroundcontainer" style="display: none;">
@@ -382,8 +398,8 @@
             document.getElementById("login").style.display = "none";
             document.getElementById("game").style.display = "block";
             document.getElementById("room").innerText = "Room " + roomId;
-            document.getElementById("word").innerText = "XXXXX";
-            document.getElementById("time").innerText = "XX";
+            document.getElementById("word").innerText = "GUESS THE WORD";
+            document.getElementById("time").innerText = "";
         });
         socket.on('player updated', function (players) {
             var playerslist = document.getElementById("players");
@@ -406,12 +422,23 @@
             console.log("i am destroyed");
             window.location.reload();
         });
-        socket.on('words', function (words) {
+        socket.on('words', async function (words) {
             document.getElementById("cw1").innerText = words[0];
             document.getElementById("cw2").innerText = words[1];
             document.getElementById("cw3").innerText = words[2];
-            document.getElementById("choosewordcontainer").style.display = "block";
             document.getElementById('input').disabled = true;
+            await sleep(2000);
+            let op = 0;
+            document.getElementById("choosewordcontainer").style.opacity = op;
+            document.getElementById("choosewordcontainer").style.display = "block";
+            let timer = setInterval(function () {
+                op += 0.05;
+                document.getElementById("choosewordcontainer").style.opacity = op;
+                if(op >= 1) {
+                    clearInterval(timer);
+                }
+            }, 50);
+            
         });
         socket.on('draw canvas', function (data) {
             console.log(data);
@@ -503,6 +530,11 @@
             document.getElementById('choosewordcontainer').style.display = 'none';
             socket.emit('get drawer', room);
             socket.emit('word picked', room, username, parseInt(index));
+        }
+        async function sleep(ms){
+            return new Promise(resolve=>{
+                setTimeout(resolve,ms)
+            });
         }
     </script>
     <script>

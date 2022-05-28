@@ -5,8 +5,11 @@
  - [x] Illegal draw management (disable canvas when not started)
  - [x] Clear canvas on drawer change
  - [x] Server save image on round end
+ - [ ] Prevent match start when not enough players
  - [ ] Scoreboard
+ - [ ] Download option all images on game end
  - [x] Room destroyment management
  - [x] Room leave management
- - [ ] Update client's player list after one of them quit
+ - [x] Update client's player list after one of them quit
+ - [ ] Send leave message to server when leaving the page
  - [x] Show hints

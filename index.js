@@ -44,6 +44,7 @@ var roomMap = {};
 io.on('connection', (socket) => {
 
   socket.on('join room', (roomId, playerName) => {
+    roomId = String(roomId);
     let newplayer = new Player(playerName, socket.id);
     if (roomId in roomMap) { // user try to join a game
       if (nameAlreadyInUse(roomMap[roomId].players, playerName)) {
@@ -55,10 +56,9 @@ io.on('connection', (socket) => {
       } else {
         socket.emit('alert', "welcome " + playerName + "!");
         roomMap[roomId].players.push(newplayer);
-        console.log(newplayer);
         socket.join(String(roomId));
         socket.emit('room joined', roomId);
-        console.log(io.sockets.adapter.rooms);
+        //console.log(io.sockets.adapter.rooms);
         io.in(String(roomId)).emit('player updated', roomMap[roomId].players);
       }
     } else {
@@ -101,7 +101,6 @@ io.on('connection', (socket) => {
       roomMap[roomId1].players.forEach(player => {
         if (player.name == username) {
           player.points += getPoints(roomMap[roomId1]);
-          console.log(getPoints(roomMap[roomId1]));
         }
       });
       roomMap[roomId1].guessedCounter++;
@@ -125,7 +124,7 @@ io.on('connection', (socket) => {
     if (room in roomMap) {
       if (roomMap[room].players.some(player => player.name == user)){ 
         roomMap[room].players.splice(roomMap[room].players.indexOf(user), 1);
-        io.in(roomId).emit('player updated', roomMap[room].players);
+        io.in(room).emit('player updated', roomMap[room].players);
         if(roomMap[room].players.length == 0){
           console.log("room " + room + " is empty, deleting");
           delete roomMap[room];
@@ -219,12 +218,13 @@ function startRound(room, socket) {
       roomMap[room].timeLeft = defaultTime;
       io.in(room).emit('time up', roomMap[room].currentWord);
       roomMap[room].currentWord = "";
-      roomMap[romm].wordHint = "";
+      roomMap[room].wordHint = "";
       changeDrawer(room);
       console.log("round ended", roomMap[room].currentDrawer.name);
       if(roomMap[room].currentRound <= roomMap[room].players.length){
         console.log("starting next round");
         roomMap[room].current3Words = getRandomWords();
+
         io.to(roomMap[room].currentDrawer.socketId).emit('words', roomMap[room].current3Words);
       }else{
         // TODO fare la fine della partita (non del round)
@@ -249,12 +249,13 @@ function getRandomWords() {
   return threeWords;
 }
 function nameAlreadyInUse(playerArray, name) {
+  let flag = false;
   playerArray.forEach(playerInGame => {
     if (playerInGame.name == name) {
-      return true;
+      flag = true;
     }
   });
-  return false;
+  return flag;
 }
 function getPoints(room) {
   const maxPoints = 1000;
@@ -266,7 +267,7 @@ function getPoints(room) {
 function getWordHint(room) {
   let word = room.currentWord;
   if(room.wordHint === ''){
-    return "_".repeat(word.length);
+    return "_ ".repeat(word.length);
   }
   if((room.wordHint.split("_").length - 1) / room.wordHint.length  <= 0.4){
     console.log("skip percentuale");
@@ -276,19 +277,15 @@ function getWordHint(room) {
   let timeLeft = room.timeLeft;
   let timeElapsed = totalTime - timeLeft;
   let previousHint = room.wordHint;
-  let showableCharCount = Math.floor(word.length / 2);//only show up to 40% of the word
   let charIndex = Math.floor(Math.random() * previousHint.length);
   if(timeElapsed >= 20){
     if(timeElapsed % 10 == 0){
       let charArray = previousHint.split('');
       while(charArray[charIndex] != '_'){
-        console.log(charIndex);
         charIndex =  Math.floor(Math.random() * previousHint.length);
       }
       charArray[charIndex] = word.split('')[charIndex];
-      console.log("neela",  charArray.join(''));
-      console.log("hint");
-      return charArray.join('');
+      return spaceString(charArray.join(''));
     }
   }
   return room.wordHint;
@@ -302,6 +299,9 @@ function changeDrawer(room) {
   roomMap[room].currentDrawer = roomMap[room].players[index];
   console.log("new drawer",roomMap[room].currentDrawer);
   io.in(room).emit('current drawer', roomMap[room].currentDrawer.name);
+}
+function spaceString(string){
+  return string.split("").join(" ");
 }
 // #endregion
 http.listen(port, () => {
