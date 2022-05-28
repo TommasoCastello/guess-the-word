@@ -2,10 +2,11 @@ const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const port = process.env.PORT || 3000;
+const { time } = require('console');
 const fs = require('fs');
 const words = JSON.parse(fs.readFileSync('words.json', 'utf8'));
 const maxPlayers = 3;
-const defaultTime = 10;
+const defaultTime = 80;
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
@@ -31,18 +32,19 @@ class Room {
 }
 
 class Player {
-  constructor(name) {
+  constructor(name, socketId) {
     this.name = name;
     this.points = 0;
+    this.socketId = socketId;
   }
 }
 
 var roomMap = {};
 
-io.on('connection', (socket, roomId) => {
+io.on('connection', (socket) => {
 
   socket.on('join room', (roomId, playerName) => {
-    let newplayer = new Player(playerName);
+    let newplayer = new Player(playerName, socket.id);
     if (roomId in roomMap) { // user try to join a game
       if (nameAlreadyInUse(roomMap[roomId].players, playerName)) {
         socket.emit('alert', "name already in use");
@@ -53,6 +55,7 @@ io.on('connection', (socket, roomId) => {
       } else {
         socket.emit('alert', "welcome " + playerName + "!");
         roomMap[roomId].players.push(newplayer);
+        console.log(newplayer);
         socket.join(String(roomId));
         socket.emit('room joined', roomId);
         console.log(io.sockets.adapter.rooms);
@@ -70,7 +73,7 @@ io.on('connection', (socket, roomId) => {
       roomId1++;
     }
     roomId1 = String(roomId1);
-    let owner = new Player(playerName);
+    let owner = new Player(playerName, socket.id);
     let newRoom = new Room(String(roomId1), owner);
     console.log(owner.name + " created room " + roomId1);
     roomMap[roomId1] = newRoom;
@@ -120,9 +123,13 @@ io.on('connection', (socket, roomId) => {
   socket.on('leave room', (room, user) => {
     console.log(user + " disconnected from room " + room);
     if (room in roomMap) {
-      if (user in roomMap[room].players) {
+      if (roomMap[room].players.some(player => player.name == user)){ 
         roomMap[room].players.splice(roomMap[room].players.indexOf(user), 1);
-        io.in(roomId).emit('player updated', roomMap[roomId].players);
+        io.in(roomId).emit('player updated', roomMap[room].players);
+        if(roomMap[room].players.length == 0){
+          console.log("room " + room + " is empty, deleting");
+          delete roomMap[room];
+        }
       }
     }
   });
@@ -166,7 +173,6 @@ io.on('connection', (socket, roomId) => {
       socket.emit('alert', "game already started");
       return;
     }
-    console.log(roomMap[room].owner.name);
     if (String(owner) != String(roomMap[room].owner.name)) {
       socket.emit('alert', "u have to be the owner to start the game");
       return;
@@ -205,7 +211,6 @@ function startRound(room, socket) {
   }
   roomMap[room].guessedCounter = 0;
   roomMap[room].currentRound++;
-  roomMap[room].currentDrawer = roomMap[room].players[roomMap[room].currentRound % (roomMap[room].players.length)];
   socket.emit('current drawer', roomMap[room].currentDrawer.name);
   roomMap[room].timer = setInterval(function () {
     if (roomMap[room].timeLeft == 0 || roomMap[room].guessedCounter == roomMap[room].players.length - 1) {
@@ -214,9 +219,22 @@ function startRound(room, socket) {
       roomMap[room].timeLeft = defaultTime;
       io.in(room).emit('time up', roomMap[room].currentWord);
       roomMap[room].currentWord = "";
+      roomMap[romm].wordHint = "";
+      changeDrawer(room);
+      console.log("round ended", roomMap[room].currentDrawer.name);
+      if(roomMap[room].currentRound <= roomMap[room].players.length){
+        console.log("starting next round");
+        roomMap[room].current3Words = getRandomWords();
+        io.to(roomMap[room].currentDrawer.socketId).emit('words', roomMap[room].current3Words);
+      }else{
+        // TODO fare la fine della partita (non del round)
+        console.log("game ended");
+        socket.emit('alert', "game ended");
+      }
     } else {
       roomMap[room].timeLeft--;
       roomMap[room].wordHint = getWordHint(roomMap[room]);
+      console.log("wordHInt", roomMap[room].wordHint);
       io.in(room).emit('word hint', roomMap[room].wordHint);
       io.in(room).emit('timer', { countdown: roomMap[room].timeLeft });
     }
@@ -247,12 +265,43 @@ function getPoints(room) {
 }
 function getWordHint(room) {
   let word = room.currentWord;
+  if(room.wordHint === ''){
+    return "_".repeat(word.length);
+  }
+  if((room.wordHint.split("_").length - 1) / room.wordHint.length  <= 0.4){
+    console.log("skip percentuale");
+    return room.wordHint;
+  }
   let totalTime = defaultTime;
   let timeLeft = room.timeLeft;
   let timeElapsed = totalTime - timeLeft;
   let previousHint = room.wordHint;
   let showableCharCount = Math.floor(word.length / 2);//only show up to 40% of the word
-  return "_ ".repeat(word.length);
+  let charIndex = Math.floor(Math.random() * previousHint.length);
+  if(timeElapsed >= 20){
+    if(timeElapsed % 10 == 0){
+      let charArray = previousHint.split('');
+      while(charArray[charIndex] != '_'){
+        console.log(charIndex);
+        charIndex =  Math.floor(Math.random() * previousHint.length);
+      }
+      charArray[charIndex] = word.split('')[charIndex];
+      console.log("neela",  charArray.join(''));
+      console.log("hint");
+      return charArray.join('');
+    }
+  }
+  return room.wordHint;
+}
+
+function changeDrawer(room) {
+  let index = roomMap[room].players.map(function(e) { return e.name; }).indexOf(roomMap[room].currentDrawer.name) + 1;
+  console.log("index", index);
+  index = index >= roomMap[room].players.length ? 0 : index;
+  console.log("old drawer", roomMap[room].currentDrawer);
+  roomMap[room].currentDrawer = roomMap[room].players[index];
+  console.log("new drawer",roomMap[room].currentDrawer);
+  io.in(room).emit('current drawer', roomMap[room].currentDrawer.name);
 }
 // #endregion
 http.listen(port, () => {

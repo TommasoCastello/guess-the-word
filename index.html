@@ -11,13 +11,26 @@
         canvas {
             padding-left: 0;
             padding-right: 0;
-            margin-left: auto;
-            margin-right: auto;
             display: block;
             border: 2px solid;
             background-color: white;
         }
 
+        #canvas-container{
+            display: flex;
+            margin-left: auto;
+            margin-right: auto;
+            width: fit-content;
+        }
+
+        #chat{
+            flex: 1;
+            background-color:  rgba(100,100,100,0.5);
+            max-width: fit-content;
+            border: 2px solid;
+            border-left: none;
+            overflow-y: scroll;
+        }
         .colors {
             display: flex;
             flex-wrap: wrap;
@@ -70,7 +83,9 @@
         }
 
         #messages {
-            max-height: 20vh;
+            height: 600px;
+            min-height: 600px;
+            width: 200px;
             overflow-y: scroll;
         }
 
@@ -262,7 +277,15 @@
         <!-- <div id="endroundcontainer" style="display: none;">
             <h1>Time's up! The word was <h1 id="endroundword"></h1></h1>
         </div> -->
-        <canvas id="can" width="800" height="600"></canvas>
+        <div id="canvas-container">
+            <canvas id="can" width="800" height="600"></canvas>
+            <div id="chat">
+                <ul id="messages" ></ul>
+                <form id="form" action="">
+                    <input id="input" autocomplete="off" /><button>Send</button>
+                </form>
+            </div>
+        </div>
         <br>
         <div class="colors">
             <div id="counter"></div>
@@ -301,10 +324,6 @@
             </div>
             <button onclick="fillbg()">Fill</button>
         </div>
-        <ul id="messages"></ul>
-        <form id="form" action="">
-            <input id="input" autocomplete="off" /><button>Send</button>
-        </form>
         <input type="button" value="save" id="btn" size="30" onclick="save()"
             style="position:absolute;top:55%;left:10%;">
     </section>
