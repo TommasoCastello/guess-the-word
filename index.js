@@ -132,6 +132,22 @@ io.on('connection', (socket) => {
       }
     }
   });
+  socket.on('disconnect', (reason) => {
+    console.log(reason);
+    //find room where socketId == socket.id
+    for (let room in roomMap) {
+      if (roomMap[room].players.some(player => player.socketId == socket.id)) {
+        let username = roomMap[room].players.find(player => player.socketId == socket.id).name;
+        console.log(username + " disconnected from room " + room);
+        roomMap[room].players.splice(roomMap[room].players.indexOf(username), 1);
+        io.in(room).emit('player updated', roomMap[room].players);
+        if(roomMap[room].players.length == 0){
+          console.log("room " + room + " is empty, deleting");
+          delete roomMap[room];
+        }
+      }
+    }
+  });
   socket.on('destroy room', (room, user) => {
     console.log(roomMap[room].players);
     if (!(room in roomMap)) {
@@ -143,6 +159,7 @@ io.on('connection', (socket) => {
       return;
     }
     io.in(room).emit('room destroyed');
+    console.log("deleting room " + room);
     delete roomMap[room];//idk if this works, copilot did it
   });
   socket.on('client canvas update', (data) => {

@@ -11,5 +11,5 @@
  - [x] Room destroyment management
  - [x] Room leave management
  - [x] Update client's player list after one of them quit
- - [ ] Send leave message to server when leaving the page
+ - [x] Handle player disconnecting
  - [x] Show hints
