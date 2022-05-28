@@ -193,8 +193,13 @@ io.on('connection', (socket) => {
       socket.emit('alert', "u have to be the owner to start the game");
       return;
     }
+    if(roomMap[room].players.length < 2){
+      socket.emit('alert', "u have to have at least 2 players to start the game");
+      return;
+    }
     roomMap[room].started = true;
     roomMap[room].current3Words = getRandomWords();
+    socket.emit('game started');
     socket.emit('words', roomMap[room].current3Words);
   });
   socket.on('word picked', (room, username, wordIndex) => {

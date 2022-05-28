@@ -5,7 +5,7 @@
  - [x] Illegal draw management (disable canvas when not started)
  - [x] Clear canvas on drawer change
  - [x] Server save image on round end
- - [ ] Prevent match start when not enough players
+ - [x] Prevent match start when not enough players
  - [ ] Scoreboard
  - [ ] Download option all images on game end
  - [x] Room destroyment management

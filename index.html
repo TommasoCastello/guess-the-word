@@ -23,6 +23,7 @@
             display: block;
             border: 2px solid;
             background-color: white;
+            cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAM1JREFUWEftk6ENgjEUhO93rWCJGlgAtkAiWaCdAQToToFkB/CwAJi3BOBJk1+RoO6RNOHqr7l8970Bnb+h835QQXYhERRBlgCbl4MiyBJg83JQBFkCbP6vHJwBmI/ELgDuLL2W9yI4BbBNKU3ap2b2ALAHcGNLehVcp5RWtdZlCOFZSjmb2RHAobuCMcZXzvnUW8Hm3+Zj4p2Hh14TtyWbh4tx0quHf55Hwqr2Ne9J8CclVZDFKoIiyBJg83JQBFkCbF4OiiBLgM137+AbRIYkKXyTNRMAAAAASUVORK5CYII=") 20 20, default;
         }
 
         #canvas-container{
@@ -294,7 +295,7 @@
             <h1>Time's up! The word was <h1 id="endroundword"></h1></h1>
         </div> -->
         <div id="canvas-container">
-            <canvas id="can" width="800" height="600"></canvas>
+            <canvas id="can" style="width: 800px; height: 600px;" width="800" height="600"></canvas>
             <div id="chat">
                 <ul id="messages" ></ul>
                 <form id="form" action="">
@@ -515,6 +516,9 @@
             document.getElementById('input').disabled = true;
             guessed = true;
         });
+        socket.on('game started', function () {
+            document.getElementById('startgamebutton').style.display = 'none';
+        });
         function leaveRoom() {
             socket.emit('leave room', room, username);
             window.location.reload();
@@ -523,7 +527,6 @@
             socket.emit('destroy room', room, username);
         }
         function startGame() {
-            document.getElementById('startgamebutton').style.display = 'none';
             socket.emit('start game', room, username);
         }
         function sendWordChoice(index) {
@@ -695,14 +698,16 @@
         }
 
         function findxy(res, e) {
+            const rect = canvas.getBoundingClientRect();
+            console.log(rect);
             if (username != currentDrawer) {
                 return;
             }
             if (res == 'down') {
                 prevX = currX;
                 prevY = currY;
-                currX = e.clientX - canvas.offsetLeft;
-                currY = e.clientY - canvas.offsetTop;
+                currX = e.pageX - rect.left;
+                currY = e.pageY - rect.top;
 
                 flag = true;
                 dot_flag = true;
@@ -721,8 +726,8 @@
                 if (flag) {
                     prevX = currX;
                     prevY = currY;
-                    currX = e.clientX - canvas.offsetLeft;
-                    currY = e.clientY - canvas.offsetTop;
+                    currX = e.pageX - rect.left;
+                    currY = e.pageY - rect.top;
                     draw();
                 }
             }
