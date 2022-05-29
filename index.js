@@ -5,7 +5,7 @@ const port = process.env.PORT || 3000;
 const { time } = require('console');
 const fs = require('fs');
 const words = JSON.parse(fs.readFileSync('words.json', 'utf8'));
-const maxPlayers = 3;
+const maxPlayers = 12;
 const defaultTime = 80;
 
 app.get('/', (req, res) => {
