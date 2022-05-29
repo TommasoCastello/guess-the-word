@@ -14,3 +14,10 @@
  - [x] Update client's player list after one of them quit
  - [x] Handle player disconnecting
  - [x] Show hints
+ - [ ] Translate to italian
+ - [ ] Disable mobile players
+ - [ ] Minimum page size handling
+ - [ ] Chat style fix
+ - [ ] Drawer point award
+ - [ ] Tea should really draw a background
+ - [ ] Add some sound
