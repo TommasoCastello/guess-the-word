@@ -6,7 +6,8 @@
  - [x] Clear canvas on drawer change
  - [x] Server save image on round end
  - [x] Prevent match start when not enough players
- - [ ] Scoreboard
+ - [ ] Manage game end
+ - [x] Scoreboard
  - [ ] Download option all images on game end
  - [x] Room destroyment management
  - [x] Room leave management

@@ -36,6 +36,8 @@ class Player {
     this.name = name;
     this.points = 0;
     this.socketId = socketId;
+    this.tries = 0;
+    this.guessed = 0;
   }
 }
 
@@ -93,7 +95,11 @@ io.on('connection', (socket) => {
       io.in(roomId1).emit('chat message', ({ color: 'black', msg: message }));
       return;
     }
+    //get the user 
+    let user = roomMap[roomId1].players.find(player => player.name == username);
+    user.tries++;
     if (String(msg).toLowerCase() == String(roomMap[roomId1].currentWord).toLowerCase()) {
+      user.guessed++;
       message = username + "guessed correctly!";
       io.in(roomId1).emit('chat message', ({ color: 'green', msg: message }));
       socket.emit('guessed correctly', roomMap[roomId1].currentWord);
@@ -105,16 +111,6 @@ io.on('connection', (socket) => {
       });
       roomMap[roomId1].guessedCounter++;
       io.in(roomId1).emit('player updated', roomMap[roomId1].players);
-      // if(roomMap[roomId1].guessedCounter == roomMap[roomId1].players.length){
-      //   roomMap[roomId1].guessedCounter = 0;
-      //   if(roomMap[roomId1].currentRound == roomMap[roomId1].players.length - 1){
-      //     //TODO HANDLE THIS IN CLIENT
-      //     io.in(roomId1).emit('game ended', roomMap[roomId1].players);
-      //   }else{
-      //     //TODO HANDLE THIS IN CLIENT
-      //     io.in(roomId1).emit('next round', roomMap[roomId1].currentRound);
-      //   }
-      // }
     } else {
       io.in(roomId1).emit('chat message', ({ color: 'black', msg: message }));
     }
@@ -250,8 +246,16 @@ function startRound(room, socket) {
         io.to(roomMap[room].currentDrawer.socketId).emit('words', roomMap[room].current3Words);
       }else{
         // TODO fare la fine della partita (non del round)
-        console.log("game ended");
-        socket.emit('alert', "game ended");
+        let scoreboard = roomMap[room].players.map(player => {
+          return {
+            name: player.name,
+            score: player.score,
+            tries: player.tries,
+            guessed: player.guessed
+          }
+        });
+        scoreboard.sort((a, b) => b.score - a.score);
+        io.in(room).emit('scoreboard', roomMap[room].players);
       }
     } else {
       roomMap[room].timeLeft--;

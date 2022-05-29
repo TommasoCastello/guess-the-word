@@ -22,6 +22,7 @@
             padding-right: 0;
             display: block;
             border: 2px solid;
+            border-right: none;
             background-color: white;
             cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAM1JREFUWEftk6ENgjEUhO93rWCJGlgAtkAiWaCdAQToToFkB/CwAJi3BOBJk1+RoO6RNOHqr7l8970Bnb+h835QQXYhERRBlgCbl4MiyBJg83JQBFkCbP6vHJwBmI/ELgDuLL2W9yI4BbBNKU3ap2b2ALAHcGNLehVcp5RWtdZlCOFZSjmb2RHAobuCMcZXzvnUW8Hm3+Zj4p2Hh14TtyWbh4tx0quHf55Hwqr2Ne9J8CclVZDFKoIiyBJg83JQBFkCbF4OiiBLgM137+AbRIYkKXyTNRMAAAAASUVORK5CYII=") 20 20, default;
         }
@@ -38,7 +39,6 @@
             background-color:  rgba(100,100,100,0.5);
             max-width: fit-content;
             border: 2px solid;
-            border-left: none;
             overflow-y: scroll;
         }
         .colors {
@@ -105,7 +105,7 @@
 
         .loginform {
             border-radius: 2%;
-            margin-top: 20vh;
+            margin-top: 12vh;
             margin-left: auto;
             margin-right: auto;
             width: 50%;
@@ -248,11 +248,199 @@
             justify-content: center;
             align-items: center;
         }
+        #scoreboard{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+        #scoreboardlist>li{
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            padding-top: 0.5%;
+            padding-bottom: 0.5%;
+            margin-top: 0.5%;
+            margin-bottom: 0.5%;
+            overflow: hidden;
+            background-color: #333;
+            width: 50%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .styled-table {
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.9em;
+            font-family: sans-serif;
+            min-width: fit-content;
+            width: 50%;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+        .scoreboardtitle{
+            text-align: center;
+            color: #ffffff;
+        }
+        .scoreboardtitle span{
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .styled-table thead tr {
+            background-color: #333;
+            color: #ffffff;
+            text-align: left;
+        }
+        .styled-table th,
+        .styled-table td {
+            text-align: center;
+            padding: 12px 15px;
+        }
+        .styled-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+            background-color: #f3f3f3;
+        }
+
+        .styled-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+
+        .styled-table tbody tr:last-of-type {
+            border-bottom: 2px solid #333;
+        }
+        .styled-table tbody tr :hover {
+            font-weight: bold;
+            color: #009879;
+        }
+        .maintitle{
+            text-align: center;
+            color: #ffffff;
+            font-size: 3em;
+        }
+        .maintitle span{
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .subtitle{
+            text-align: center;
+            color: #ffffff;
+            font-size: medium;
+        }
+        .subtitle span{
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .slide-in {
+            z-index: 10; /* to position it in front of the other content */
+            position: absolute;
+            overflow: hidden; /* to prevent scrollbar appearing */
+        }
+        .slide-in.from-right .popup {
+            transform: translateX(100%);
+            -webkit-transform: translateX(100%);
+        }
+        .slide-in.from-right {
+            right: 0;
+        }
+        .close {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            opacity: 0.6;
+        }
+        .close:hover {
+            opacity: 1;
+        }
+        .close:before, .close:after {
+            position: absolute;
+            right: 15px;
+            top: 0;
+            content: ' ';
+            height: 33px;
+            width: 2px;
+            background-color: rgb(255, 255, 255);
+        }
+        .close:before {
+            transform: rotate(45deg);
+        }
+        .close:after {
+            transform: rotate(-45deg);
+        }
+        .popup-content {
+            margin: 10px;
+            padding: 20px;
+            width: 300px;
+            height: 70px;
+            background-color: #ffffff;
+            opacity: 0.8;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+        #slider {
+            position: absolute;
+            z-index: 1;
+            right: 0;
+            bottom: 0;
+            margin: 20px 10px;
+            width: 400px;
+            height: 130px;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: inline-block;
+        }
+        .slide-in {
+            animation: slide-in 1s forwards;
+            -webkit-animation: slide-in 1s forwards;
+        }
+        .slide-out {
+            animation: slide-in 1s forwards;
+            -webkit-animation: slide-out 1s forwards;
+        }
+            
+        @keyframes slide-in {
+            0% { transform: translateY(200%); }
+            100% { transform: translateY(0%); }
+        }
+
+        @-webkit-keyframes slide-in {
+            0% { transform: translateY(200%); }
+            100% { -webkit-transform: translateY(0%); }
+        }
+            
+        @keyframes slide-out {
+            0% { transform: translateY(0%); }
+            100% { transform: translateY(200%); }
+        }
+
+        @-webkit-keyframes slide-out {
+            0% { -webkit-transform: translateY(0%); }
+            100% { -webkit-transform: translateY(200%); }
+        }
     </style>
 </head>
 
 <body onload="init()">
+    <div id="slider" class="slide-in">
+        <a onclick="togglePopup()" class="close"></a>
+        <p class="popup-content" id="popupmessage">Welcome to Guess the word!</p>
+    </div>
     <section id="login">
+        <h1 class="maintitle">
+            <span>
+                Guess the word
+            </span>
+        </h1>
+        <h4 class="subtitle">
+            <span>
+                by Tümi and Jan
+            </span>
+        </h2>
         <form name="login" class="loginform">
             <input type="text" name="username" placeholder="Username">
             <input type="number" name="roomcode" placeholder="Room code (ignored if you create a room)">
@@ -344,6 +532,20 @@
         <input type="button" value="save" id="btn" size="30" onclick="save()"
             style="position:absolute;top:55%;left:10%;">
     </section>
+    <section id="scoreboard" style="display: none;">
+        <table class="styled-table" id="scoreboardtable">
+            <h1 class="scoreboardtitle"><span>Scoreboard</span></h1>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Username</th>
+                    <th>Score</th>
+                    <th>%</th>
+                </tr>
+            </thead>
+        </table>
+        <a class="topnavbutton" style="text-align: center;" onclick="leaveRoom()">Play again</a>
+    </section>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var username;
@@ -352,7 +554,7 @@
         function createRoom() {
             var usernamein = document.forms["login"]["username"].value;
             if (usernamein == "" || usernamein == null) {
-                alert("Fill in username");
+                showPopup("Fill in username");
                 return;
             }
             username = usernamein;
@@ -363,7 +565,7 @@
             var usernamein = document.forms["login"]["username"].value;
             var roomcodein = document.forms["login"]["roomcode"].value;
             if (usernamein == "" || roomcodein == "" || usernamein == null || roomcodein == null) {
-                alert("Please fill in all fields");
+                showPopup("Please fill in all fields");
                 return;
             }
             username = usernamein;
@@ -385,7 +587,7 @@
         });
 
         socket.on('alert', function (msg) {
-            alert(msg);
+            showPopup(msg);
         });
 
         socket.on('created room', function (roomId) {
@@ -502,6 +704,26 @@
             ctx.fillRect(0, 0, w, h);
             ctx.fillStyle = tmp;
         });
+        socket.on('scoreboard', function (obj){
+            console.log(obj);
+            document.getElementById('game').style.display = "none";
+            document.getElementById("scoreboard").style.display = "block";
+            var table = document.getElementById('scoreboardtable');
+            var tbody = document.createElement('tbody');
+            for (var i = 0; i < obj.length; i++) {
+                var player = document.createElement("tr");
+                let name = obj[i].name;
+                let points = obj[i].points + " points";
+                if(obj[i].points == 1) {
+                    points = obj[i].points + " point";
+                }
+                let percentage = (obj[i].guessed / obj[i].tries * 100).toFixed(0) + "%";
+                percentage += "("+obj[i].guessed+"/"+obj[i].tries+")";
+                player.innerHTML = "<td>" + (i+1) + "</td><td>" + name + "</td><td>" + points + "</td><td>" + percentage + "</td>";
+                tbody.appendChild(player);
+            }
+            table.appendChild(tbody);
+        });
         socket.on('full word for drawer', function (word) {
             document.getElementById('word').innerText = word;
         });
@@ -528,6 +750,30 @@
         }
         function startGame() {
             socket.emit('start game', room, username);
+        }
+        function togglePopup(message){
+            let $slider = document.getElementById('slider');
+            let isOpen = $slider.classList.contains('slide-in');
+            //console.log($slider.classList);
+            if(!message){
+                message = "";
+            }
+            document.getElementById('popupmessage').innerText = message;
+            if(isOpen){
+                $slider.removeAttribute('class', 'slide-in');
+                $slider.setAttribute('class', 'slide-out');
+            } else {
+                $slider.removeAttribute('class', 'slide-out');
+                $slider.setAttribute('class', 'slide-in');
+            }
+            return !isOpen;
+        }
+        async function showPopup(message){
+            if(togglePopup(message)){
+                return;
+            }
+            await sleep(1000);
+            togglePopup(message);
         }
         function sendWordChoice(index) {
             document.getElementById('choosewordcontainer').style.display = 'none';
@@ -699,7 +945,6 @@
 
         function findxy(res, e) {
             const rect = canvas.getBoundingClientRect();
-            console.log(rect);
             if (username != currentDrawer) {
                 return;
             }
