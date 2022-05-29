@@ -545,12 +545,14 @@
             </thead>
         </table>
         <a class="topnavbutton" style="text-align: center;" onclick="leaveRoom()">Play again</a>
+        <a class="topnavbutton" style="text-align: center;" onclick="socket.emit('download images', room);">Download images</a>
     </section>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var username;
         var room;
         var currentDrawer;
+        var dontDraw = true;
         function createRoom() {
             var usernamein = document.forms["login"]["username"].value;
             if (usernamein == "" || usernamein == null) {
@@ -622,10 +624,10 @@
             messages.scrollTo(0, messages.scrollHeight);
         });
         socket.on('room destroyed', function () {
-            console.log("i am destroyed");
             window.location.reload();
         });
         socket.on('words', async function (words) {
+            dontDraw = true;
             document.getElementById("cw1").innerText = words[0];
             document.getElementById("cw2").innerText = words[1];
             document.getElementById("cw3").innerText = words[2];
@@ -644,7 +646,6 @@
             
         });
         socket.on('draw canvas', function (data) {
-            console.log(data);
             var ctx = document.getElementById("can").getContext("2d");
             switch (data.type) {
                 case 'erase':
@@ -687,6 +688,7 @@
             guessed = false;
             socket.emit('canvas data send',
                 document.getElementById('can').toDataURL("image/jpg"),
+                username,
                 room);
             socket.emit('client canvas update', {
                 x: currX,
@@ -741,6 +743,12 @@
         socket.on('game started', function () {
             document.getElementById('startgamebutton').style.display = 'none';
         });
+        socket.on('images downloaded', function(images){
+            console.log(images);
+            for (const img of images) {
+                save(img.data, img.name);
+            }
+        });
         function leaveRoom() {
             socket.emit('leave room', room, username);
             window.location.reload();
@@ -778,6 +786,7 @@
         function sendWordChoice(index) {
             document.getElementById('choosewordcontainer').style.display = 'none';
             socket.emit('get drawer', room);
+            dontDraw = false;
             socket.emit('word picked', room, username, parseInt(index));
         }
         async function sleep(ms){
@@ -895,7 +904,7 @@
             ctx.closePath();
         }
         function erase() {
-            if (username != currentDrawer) {
+            if (username != currentDrawer || dontDraw) {
                 return;
             }
             if (confirm("Sicuro di voler fare un clear?")) {
@@ -917,7 +926,7 @@
             }
         }
         function fillbg() {
-            if (username != currentDrawer) {
+            if (username != currentDrawer || dontDraw) {
                 return;
             }
             if (confirm("Sicuro di voler fare un fill " + selectedColor + "?")) {
@@ -936,16 +945,16 @@
                 ctx.fillRect(0, 0, w, h);
             }
         }
-        function save() {
+        function save(data, name) {
             var link = document.createElement('a');
-            link.download = 'untitled.jpg';
-            link.href = document.getElementById('can').toDataURL("image/jpg");
+            link.download = name + '.jpg';
+            link.href = data;
             link.click();
         }
 
         function findxy(res, e) {
             const rect = canvas.getBoundingClientRect();
-            if (username != currentDrawer) {
+            if (username != currentDrawer || dontDraw) {
                 return;
             }
             if (res == 'down') {

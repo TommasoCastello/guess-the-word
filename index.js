@@ -25,6 +25,7 @@ class Room {
     this.currentWord = '';
     this.guessedCounter = 0;
     this.canvasImages = [];
+    this.beforeWord = '';
     this.wordHint = '';
     this.timeLeft = defaultTime;
     this.timer;
@@ -41,6 +42,12 @@ class Player {
   }
 }
 
+class CanvasImage {
+  constructor(data, name){
+    this.data = data;
+    this.name = name;
+  }
+}
 var roomMap = {};
 
 io.on('connection', (socket) => {
@@ -158,6 +165,13 @@ io.on('connection', (socket) => {
     console.log("deleting room " + room);
     delete roomMap[room];//idk if this works, copilot did it
   });
+  socket.on('download images', (room) => {
+    if (!(room in roomMap)) {
+      socket.emit('alert', "room not found");
+      return;
+    }
+    socket.emit('images downloaded', roomMap[room].canvasImages);
+  });
   socket.on('client canvas update', (data) => {
     data.room = String(data.room);
     if (!(data.room in roomMap)) {
@@ -211,13 +225,16 @@ io.on('connection', (socket) => {
     console.log("picked word " + roomMap[room].currentWord);
     startRound(room, socket);
   });
-  socket.on('canvas data send', (data, room) => {
+  socket.on('canvas data send', (data, user, room) => {
     room = String(room);
     if (!(room in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    roomMap[room].canvasImages.push(data);
+    if (user != roomMap[room].currentDrawer.name) {
+      return;
+    }
+    roomMap[room].canvasImages.push(new CanvasImage(data, roomMap[room].beforeWord+"_by_"+user));
   });
 });
 
@@ -235,6 +252,7 @@ function startRound(room, socket) {
       clearInterval(roomMap[room].timer);
       roomMap[room].timeLeft = defaultTime;
       io.in(room).emit('time up', roomMap[room].currentWord);
+      roomMap[room].beforeWord = roomMap[room].currentWord;
       roomMap[room].currentWord = "";
       roomMap[room].wordHint = "";
       changeDrawer(room);
