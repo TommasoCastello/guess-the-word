@@ -21,3 +21,9 @@
  - [ ] Drawer point award
  - [ ] Tea should really draw a background
  - [ ] Add some sound
+ - [ ] Word by drawer fix
+ - [ ] Broken hints
+ - [ ] Js injection (username constant)
+ - [ ] Leaderboard sort
+ - [ ] Flying save button
+ - [ ] Round started, ended etc more visible
