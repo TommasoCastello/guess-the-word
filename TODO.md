@@ -23,7 +23,7 @@
  - [ ] Add some sound
  - [ ] [TESTING] Word by drawer fix
  - [ ] Broken hints
- - [ ] Js injection (username constant)
- - [ ] Leaderboard sort
- - [ ] Flying save button
+ - [x] Js injection
+ - [x] Leaderboard sort
+ - [x] Flying save button
  - [ ] Round started, ended etc more visible

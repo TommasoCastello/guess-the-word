@@ -396,11 +396,15 @@
         }
         .slide-in {
             animation: slide-in 1s forwards;
-            -webkit-animation: slide-in 1s forwards;
+            -webkit-animation: slide-in 0.8s forwards;
         }
         .slide-out {
             animation: slide-in 1s forwards;
-            -webkit-animation: slide-out 1s forwards;
+            -webkit-animation: slide-out 0.8s forwards;
+        }
+        .gtfo{
+            animation: gtfo 0.1s forwards;
+            -webkit-animation: gtfo 0.1s forwards;
         }
             
         @keyframes slide-in {
@@ -422,11 +426,27 @@
             0% { -webkit-transform: translateY(0%); }
             100% { -webkit-transform: translateY(200%); }
         }
+        @keyframes gtfo{
+            0%{
+                transform: translateY(200%);
+            }
+            100%{
+                transform: translateY(200%);
+            }
+        }
+        @-webkit-keyframes gtfo{
+            0%{
+                transform: translateY(200%);
+            }
+            100%{
+                transform: translateY(200%);
+            }
+        }
     </style>
 </head>
 
 <body onload="init()">
-    <div id="slider" class="slide-in">
+    <div id="slider" class="gtfo">
         <a onclick="togglePopup()" class="close"></a>
         <p class="popup-content" id="popupmessage">Welcome to Guess the word!</p>
     </div>
@@ -478,6 +498,7 @@
 
             <!-- Right-aligned links -->
             <div class="topnav-right">
+                <a class="topnavbutton" onclick="save(document.getElementById('can').toDataURL('image/jpg'), prompt('Enter a name for this image'));">SAVE</a>
                 <a id="room"></a>
                 <a id="time"></a>
                 <a id="drawer"></a>
@@ -543,8 +564,6 @@
             </div>
             <button onclick="fillbg()">Fill</button>
         </div>
-        <input type="button" value="save" id="btn" size="30" onclick="save()"
-            style="position:absolute;top:55%;left:10%;">
     </section>
     <section id="scoreboard" style="display: none;">
         <table class="styled-table" id="scoreboardtable">
@@ -597,7 +616,7 @@
         form.addEventListener('submit', function (e) {
             e.preventDefault();
             if (input.value) {
-                socket.emit('chat message', input.value, room, username);
+                socket.emit('chat message', input.value, room);
                 input.value = '';
             }
         });
@@ -646,7 +665,7 @@
             document.getElementById("cw2").innerText = words[1];
             document.getElementById("cw3").innerText = words[2];
             document.getElementById('input').disabled = true;
-            await sleep(2000);
+            await sleep(500);
             let op = 0;
             document.getElementById("choosewordcontainer").style.opacity = op;
             document.getElementById("choosewordcontainer").style.display = "block";
@@ -702,7 +721,6 @@
             guessed = false;
             socket.emit('canvas data send',
                 document.getElementById('can').toDataURL("image/jpg"),
-                username,
                 room);
             socket.emit('client canvas update', {
                 x: currX,
@@ -712,7 +730,6 @@
                 color: selectedColor,
                 size: brushSize,
                 room: String(room),
-                username: username,
                 type: "erase"
             });
             let tmp = ctx.fillStyle;
@@ -764,14 +781,14 @@
             }
         });
         function leaveRoom() {
-            socket.emit('leave room', room, username);
+            socket.emit('leave room', room);
             window.location.reload();
         }
         function destroyRoom() {
-            socket.emit('destroy room', room, username);
+            socket.emit('destroy room', room);
         }
         function startGame() {
-            socket.emit('start game', room, username);
+            socket.emit('start game', room);
         }
         function togglePopup(message){
             let $slider = document.getElementById('slider');
@@ -792,16 +809,20 @@
         }
         async function showPopup(message){
             if(togglePopup(message)){
+                await sleep(1500);
+                togglePopup(message);
                 return;
             }
             await sleep(1000);
+            togglePopup(message);
+            await sleep(1500);
             togglePopup(message);
         }
         function sendWordChoice(index) {
             document.getElementById('choosewordcontainer').style.display = 'none';
             socket.emit('get drawer', room);
             dontDraw = false;
-            socket.emit('word picked', room, username, parseInt(index));
+            socket.emit('word picked', room, parseInt(index));
         }
         async function sleep(ms){
             return new Promise(resolve=>{
@@ -932,7 +953,6 @@
                 color: selectedColor,
                 size: brushSize,
                 room: String(room),
-                username: username,
                 type: "draw"
             });
             ctx.beginPath();
@@ -958,7 +978,6 @@
                     color: selectedColor,
                     size: brushSize,
                     room: String(room),
-                    username: username,
                     type: "erase"
                 });
                 let tmp = ctx.fillStyle;
@@ -980,7 +999,6 @@
                     color: selectedColor,
                     size: brushSize,
                     room: String(room),
-                    username: username,
                     type: "fill"
                 });
                 ctx.fillStyle = selectedColor;
