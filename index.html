@@ -448,6 +448,20 @@
             <input type="button" onclick="joinRoom()" value="JOIN ROOM">
         </form>
     </section>
+    <section id="mobile" style="display: none;">
+        <h1 class="maintitle">
+            <span>
+                This website does not work on mobile.
+            </span>
+        </h1>
+    </section>
+    <section id="error" style="display: none;">
+        <h1 class="maintitle">
+            <span>
+                Use a bigger window to play.
+            </span>
+        </h1>
+    </section>
     <section id="game" style="display: none;">
         <!-- Top navigation -->
         <div class="topnav">
@@ -794,6 +808,34 @@
                 setTimeout(resolve,ms)
             });
         }
+        //if user is on a mobile device, disable log in
+        if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('mobile').style.display = 'block';
+        }
+        //on resize if screen is smaller than 1060px, hide current section and show error
+        window.addEventListener('resize', function () {
+            //get all sections
+            let sections = document.getElementsByTagName('section');
+            //get current section
+            let currentSection;
+            for (const section of sections) {
+                if(section.style.display == 'block'){
+                    currentSection = section;
+                    break;
+                }
+            }
+            if(currentSection.id != 'game' && document.getElementById('error').style.display == 'none'){
+                return;
+            }
+            if (window.innerWidth < 1000 || window.innerHeight < 850) {
+                document.getElementById('game').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            } else {
+                document.getElementById('game').style.display = 'block';
+                document.getElementById('error').style.display = 'none';
+            }
+        });
     </script>
     <script>
         var canvas, ctx, flag = false,

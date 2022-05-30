@@ -26,6 +26,7 @@ class Room {
     this.guessedCounter = 0;
     this.canvasImages = [];
     this.beforeWord = '';
+    this.beforeDrawer = '';
     this.wordHint = '';
     this.timeLeft = defaultTime;
     this.timer;
@@ -340,6 +341,7 @@ function changeDrawer(room) {
   console.log("index", index);
   index = index >= roomMap[room].players.length ? 0 : index;
   console.log("old drawer", roomMap[room].currentDrawer);
+  roomMap[room].beforeDrawer = roomMap[room].currentDrawer;
   roomMap[room].currentDrawer = roomMap[room].players[index];
   console.log("new drawer",roomMap[room].currentDrawer);
   io.in(room).emit('current drawer', roomMap[room].currentDrawer.name);

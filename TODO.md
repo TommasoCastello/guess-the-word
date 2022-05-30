@@ -15,13 +15,13 @@
  - [x] Handle player disconnecting
  - [x] Show hints
  - [ ] Translate to italian
- - [ ] Disable mobile players
- - [ ] Minimum page size handling
+ - [ ] [TESTING] Disable mobile players
+ - [x] Minimum page size handling
  - [ ] Chat style fix
  - [ ] Drawer point award
  - [ ] Tea should really draw a background
  - [ ] Add some sound
- - [ ] Word by drawer fix
+ - [ ] [TESTING] Word by drawer fix
  - [ ] Broken hints
  - [ ] Js injection (username constant)
  - [ ] Leaderboard sort
