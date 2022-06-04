@@ -14,16 +14,16 @@
  - [x] Update client's player list after one of them quit
  - [x] Handle player disconnecting
  - [x] Show hints
- - [ ] Translate to italian
- - [ ] [TESTING] Disable mobile players
+ - [x] Max username length
+ - [x] Central mouse click chat
  - [x] Minimum page size handling
- - [ ] Chat style fix
- - [ ] Drawer point award
+ - [x] Chat style fix
+ - [x] Drawer point award
  - [ ] Tea should really draw a background
- - [ ] Add some sound
- - [ ] [TESTING] Word by drawer fix
- - [ ] Broken hints
+ - [x] Broken hints
  - [x] Js injection
  - [x] Leaderboard sort
  - [x] Flying save button
- - [ ] Round started, ended etc more visible
+ - [ ] Public and private rooms
+ - [ ] Leaderboard photos pick
+ - [ ] Leaderboard sort

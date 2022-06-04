@@ -44,7 +44,7 @@ class Player {
 }
 
 class CanvasImage {
-  constructor(data, name){
+  constructor(data, name) {
     this.data = data;
     this.name = name;
   }
@@ -97,6 +97,7 @@ io.on('connection', (socket) => {
       return;
     }
     let username = getUsername(socket, roomId1);
+    msg = msg.substring(0, 50);
     let message = username + ": " + msg;
     if (!(roomMap[roomId1].started)
       || roomMap[roomId1].currentDrawer.name == username) {
@@ -105,6 +106,9 @@ io.on('connection', (socket) => {
     }
     //get the user 
     let user = roomMap[roomId1].players.find(player => player.name == username);
+    if (user == undefined) {
+      return;
+    }
     user.tries++;
     if (String(msg).toLowerCase() == String(roomMap[roomId1].currentWord).toLowerCase()) {
       user.guessed++;
@@ -115,6 +119,7 @@ io.on('connection', (socket) => {
       roomMap[roomId1].players.forEach(player => {
         if (player.name == username) {
           player.points += getPoints(roomMap[roomId1]);
+          roomMap[roomId1].currentDrawer.points += getDrawerPoints(roomMap[roomId1]);
         }
       });
       roomMap[roomId1].guessedCounter++;
@@ -127,10 +132,10 @@ io.on('connection', (socket) => {
     if (room in roomMap) {
       let user = getUsername(socket, room);
       console.log(user + " disconnected from room " + room);
-      if (roomMap[room].players.some(player => player.name == user)){ 
+      if (roomMap[room].players.some(player => player.name == user)) {
         roomMap[room].players.splice(roomMap[room].players.indexOf(user), 1);
         io.in(room).emit('player updated', roomMap[room].players);
-        if(roomMap[room].players.length == 0){
+        if (roomMap[room].players.length == 0) {
           console.log("room " + room + " is empty, deleting");
           delete roomMap[room];
         }
@@ -146,7 +151,7 @@ io.on('connection', (socket) => {
         console.log(username + " disconnected from room " + room);
         roomMap[room].players.splice(roomMap[room].players.indexOf(username), 1);
         io.in(room).emit('player updated', roomMap[room].players);
-        if(roomMap[room].players.length == 0){
+        if (roomMap[room].players.length == 0) {
           console.log("room " + room + " is empty, deleting");
           delete roomMap[room];
         }
@@ -208,7 +213,7 @@ io.on('connection', (socket) => {
       socket.emit('alert', "u have to be the owner to start the game");
       return;
     }
-    if(roomMap[room].players.length < 2){
+    if (roomMap[room].players.length < 2) {
       socket.emit('alert', "u have to have at least 2 players to start the game");
       return;
     }
@@ -241,7 +246,7 @@ io.on('connection', (socket) => {
     if (user != roomMap[room].currentDrawer.name) {
       return;
     }
-    roomMap[room].canvasImages.push(new CanvasImage(data, roomMap[room].beforeWord+"_by_"+user));
+    roomMap[room].canvasImages.push(new CanvasImage(data, roomMap[room].beforeWord));
   });
 });
 
@@ -252,6 +257,9 @@ function startRound(room, socket) {
   }
   roomMap[room].guessedCounter = 0;
   roomMap[room].currentRound++;
+  if (roomMap[room].currentRound == 0) {
+    roomMap[room].currentDrawer = roomMap[room].players[0];
+  }
   socket.emit('current drawer', roomMap[room].currentDrawer.name);
   roomMap[room].timer = setInterval(function () {
     if (roomMap[room].timeLeft == 0 || roomMap[room].guessedCounter == roomMap[room].players.length - 1) {
@@ -264,12 +272,12 @@ function startRound(room, socket) {
       roomMap[room].wordHint = "";
       changeDrawer(room);
       console.log("round ended", roomMap[room].currentDrawer.name);
-      if(roomMap[room].currentRound <= roomMap[room].players.length){
+      if (roomMap[room].currentRound <= roomMap[room].players.length) {
         console.log("starting next round");
         roomMap[room].current3Words = getRandomWords();
 
         io.to(roomMap[room].currentDrawer.socketId).emit('words', roomMap[room].current3Words);
-      }else{
+      } else {
         let scoreboard = roomMap[room].players.map(player => {
           return {
             name: player.name,
@@ -318,12 +326,16 @@ function getPoints(room) {
   const step = maxPoints / players;
   return Math.floor(maxPoints - (step * guessedCounter));
 }
+function getDrawerPoints(room) {
+  const maxPoints = 1000;
+  return Math.floor(maxPoints / (room.players.length - 1));
+}
 function getWordHint(room) {
   let word = room.currentWord;
-  if(room.wordHint === ''){
-    return "_ ".repeat(word.length);
+  if (room.wordHint === '') {
+    return "_".repeat(word.length);
   }
-  if((room.wordHint.split("_").length - 1) / room.wordHint.length  <= 0.4){
+  if ((room.wordHint.split("_").length - 1) / room.wordHint.length <= 0.4) {
     console.log("skip percentuale");
     return room.wordHint;
   }
@@ -332,11 +344,11 @@ function getWordHint(room) {
   let timeElapsed = totalTime - timeLeft;
   let previousHint = room.wordHint;
   let charIndex = Math.floor(Math.random() * previousHint.length);
-  if(timeElapsed >= 20){
-    if(timeElapsed % 10 == 0){
+  if (timeElapsed >= 20) {
+    if (timeElapsed % 10 == 0) {
       let charArray = previousHint.split('');
-      while(charArray[charIndex] != '_'){
-        charIndex =  Math.floor(Math.random() * previousHint.length);
+      while (charArray[charIndex] != '_') {
+        charIndex = Math.floor(Math.random() * previousHint.length);
       }
       charArray[charIndex] = word.split('')[charIndex];
       return spaceString(charArray.join(''));
@@ -346,25 +358,25 @@ function getWordHint(room) {
 }
 
 function changeDrawer(room) {
-  let index = roomMap[room].players.map(function(e) { return e.name; }).indexOf(roomMap[room].currentDrawer.name) + 1;
+  let index = roomMap[room].players.map(function (e) { return e.name; }).indexOf(roomMap[room].currentDrawer.name) + 1;
   console.log("index", index);
   index = index >= roomMap[room].players.length ? 0 : index;
   console.log("old drawer", roomMap[room].currentDrawer);
   roomMap[room].beforeDrawer = roomMap[room].currentDrawer;
   roomMap[room].currentDrawer = roomMap[room].players[index];
-  console.log("new drawer",roomMap[room].currentDrawer);
+  console.log("new drawer", roomMap[room].currentDrawer);
   io.in(room).emit('current drawer', roomMap[room].currentDrawer.name);
 }
-function spaceString(string){
-  return string.split("").join(" ");
+function spaceString(string) {
+  return string;
 }
-function getUsername(socket, room){
+function getUsername(socket, room) {
   room = String(room);
-  if(!(room in roomMap)){
+  if (!(room in roomMap)) {
     return undefined;
   }
   let player = roomMap[room].players.find(p => p.socketId == socket.id);
-  if(player === undefined){
+  if (player === undefined) {
     return undefined;
   }
   return player.name;
