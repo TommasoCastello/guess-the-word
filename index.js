@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 });
 
 class Room {
-  constructor(id, owner) {
+  constructor(id, owner, publicFlag) {
     console.log(id, owner);
     this.id = id;
     this.owner = owner;
@@ -30,6 +30,7 @@ class Room {
     this.wordHint = '';
     this.timeLeft = defaultTime;
     this.timer;
+    this.public = publicFlag;
   }
 }
 
@@ -75,7 +76,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('new room', (playerName) => {
+  socket.on('new room', (playerName, public) => {
     // create new room
     let roomId1 = 0;
     while (roomId1 in roomMap) {
@@ -83,7 +84,7 @@ io.on('connection', (socket) => {
     }
     roomId1 = String(roomId1);
     let owner = new Player(playerName, socket.id);
-    let newRoom = new Room(String(roomId1), owner);
+    let newRoom = new Room(String(roomId1), owner, public);
     console.log(owner.name + " created room " + roomId1);
     roomMap[roomId1] = newRoom;
 
@@ -248,8 +249,18 @@ io.on('connection', (socket) => {
     }
     roomMap[room].canvasImages.push(new CanvasImage(data, roomMap[room].beforeWord));
   });
+  socket.on('get public rooms', () => {
+    let privateRooms = [];
+    for (let room in roomMap) {
+      console.log(room);
+      if (roomMap[room].public && !roomMap[room].started) {
+        privateRooms.push(roomMap[room]);
+      }
+    }
+    console.log(privateRooms);
+    socket.emit('public rooms', privateRooms);
+  });
 });
-
 function startRound(room, socket) {
   if (!(room in roomMap)) {
     socket.emit('alert', "room not found");

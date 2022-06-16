@@ -4,10 +4,17 @@
 <head>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kalam&family=Shadows+Into+Light+Two&display=swap');
+
         @keyframes fadein {
-            from { opacity: 0; }
-            to   { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
+
         body {
             background-color: rgb(45, 127, 251);
             overflow: hidden;
@@ -16,12 +23,17 @@
             background-repeat: repeat;
             /* font-family: "Comic Sans MS", "Comic Sans", cursive; */
         }
-        #login{
-            -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
-            -moz-animation: fadein 1s; /* Firefox < 16 */
-            -o-animation: fadein 1s; /* Opera < 12.1 */
+
+        #login {
+            -webkit-animation: fadein 1s;
+            /* Safari, Chrome and Opera > 12.1 */
+            -moz-animation: fadein 1s;
+            /* Firefox < 16 */
+            -o-animation: fadein 1s;
+            /* Opera < 12.1 */
             animation: fadein 1s;
         }
+
         canvas {
             padding-left: 0;
             padding-right: 0;
@@ -33,32 +45,35 @@
             cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAM1JREFUWEftk6ENgjEUhO93rWCJGlgAtkAiWaCdAQToToFkB/CwAJi3BOBJk1+RoO6RNOHqr7l8970Bnb+h835QQXYhERRBlgCbl4MiyBJg83JQBFkCbP6vHJwBmI/ELgDuLL2W9yI4BbBNKU3ap2b2ALAHcGNLehVcp5RWtdZlCOFZSjmb2RHAobuCMcZXzvnUW8Hm3+Zj4p2Hh14TtyWbh4tx0quHf55Hwqr2Ne9J8CclVZDFKoIiyBJg83JQBFkCbF4OiiBLgM137+AbRIYkKXyTNRMAAAAASUVORK5CYII=") 20 20, default;
         }
 
-        #canvas-container{
+        #canvas-container {
             display: flex;
             margin-left: auto;
             margin-right: auto;
             width: fit-content;
         }
 
-        #chat{
-            background-color:  rgb(28, 83, 146);
+        #chat {
+            background-color: rgb(28, 83, 146);
             width: 210px;
             border: 2px solid;
         }
-        #players{
-            background-color:  rgb(28, 83, 146);
+
+        #players {
+            background-color: rgb(28, 83, 146);
             width: 235px;
             border: 2px solid;
             padding: 5px;
             margin: 0;
         }
-        #players>li{
+
+        #players>li {
             list-style: none;
             background-color: rgba(255, 255, 255, 0.6);
             border: 1px solid #111;
             border-radius: 3px;
             font-family: "Comic Sans MS", "Comic Sans", cursive;
         }
+
         .colors {
             display: flex;
             flex-wrap: wrap;
@@ -81,7 +96,8 @@
             background-color: white;
             border-radius: 5%;
         }
-        #word{
+
+        #word {
             letter-spacing: 3px;
         }
 
@@ -278,23 +294,27 @@
         #choosewordtitle {
             text-align: center;
         }
-        #form{
+
+        #form {
             width: 210px;
             display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: center;
         }
-        #input{
+
+        #input {
             width: 150px;
         }
-        #scoreboard{
+
+        #scoreboard {
             display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: center;
         }
-        #scoreboardlist>li{
+
+        #scoreboardlist>li {
             list-style-type: none;
             margin: 0;
             padding: 0;
@@ -308,6 +328,7 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         .styled-table {
             border-collapse: collapse;
             margin: 25px 0;
@@ -319,25 +340,30 @@
             margin-right: auto;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
         }
-        .scoreboardtitle{
+
+        .scoreboardtitle {
             text-align: center;
             color: #ffffff;
         }
-        .scoreboardtitle span{
+
+        .scoreboardtitle span {
             background-color: #333;
             padding: 10px;
             border-radius: 5px;
         }
+
         .styled-table thead tr {
             background-color: #333;
             color: #ffffff;
             text-align: left;
         }
+
         .styled-table th,
         .styled-table td {
             text-align: center;
             padding: 12px 15px;
         }
+
         .styled-table tbody tr {
             border-bottom: 1px solid #dddddd;
             background-color: #f3f3f3;
@@ -350,42 +376,53 @@
         .styled-table tbody tr:last-of-type {
             border-bottom: 2px solid #333;
         }
+
         .styled-table tbody tr :hover {
             font-weight: bold;
             color: #009879;
         }
-        .maintitle{
+
+        .maintitle {
             text-align: center;
             color: #ffffff;
             font-size: 3em;
         }
-        .maintitle span{
+
+        .maintitle span {
             background-color: #333;
             padding: 10px;
             border-radius: 5px;
         }
-        .subtitle{
+
+        .subtitle {
             text-align: center;
             color: #ffffff;
             font-size: medium;
         }
-        .subtitle span{
+
+        .subtitle span {
             background-color: #333;
             padding: 10px;
             border-radius: 5px;
         }
+
         .slide-in {
-            z-index: 10; /* to position it in front of the other content */
+            z-index: 10;
+            /* to position it in front of the other content */
             position: absolute;
-            overflow: hidden; /* to prevent scrollbar appearing */
+            overflow: hidden;
+            /* to prevent scrollbar appearing */
         }
+
         .slide-in.from-right .popup {
             transform: translateX(100%);
             -webkit-transform: translateX(100%);
         }
+
         .slide-in.from-right {
             right: 0;
         }
+
         .close {
             position: absolute;
             right: 0;
@@ -394,10 +431,13 @@
             height: 32px;
             opacity: 0.6;
         }
+
         .close:hover {
             opacity: 1;
         }
-        .close:before, .close:after {
+
+        .close:before,
+        .close:after {
             position: absolute;
             right: 15px;
             top: 0;
@@ -406,12 +446,15 @@
             width: 2px;
             background-color: rgb(255, 255, 255);
         }
+
         .close:before {
             transform: rotate(45deg);
         }
+
         .close:after {
             transform: rotate(-45deg);
         }
+
         .popup-content {
             margin: 10px;
             padding: 20px;
@@ -422,6 +465,7 @@
             border-radius: 5px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
         }
+
         #slider {
             position: absolute;
             z-index: 1;
@@ -435,54 +479,141 @@
             display: inline-block;
             border-radius: 5px;
         }
-        
+
         .slide-in {
             animation: slide-in 1s forwards;
             -webkit-animation: slide-in 0.8s forwards;
         }
+
         .slide-out {
             animation: slide-in 1s forwards;
             -webkit-animation: slide-out 0.8s forwards;
         }
-        .gtfo{
+
+        .gtfo {
             animation: gtfo 0.1s forwards;
             -webkit-animation: gtfo 0.1s forwards;
         }
-            
+
         @keyframes slide-in {
-            0% { transform: translateY(200%); }
-            100% { transform: translateY(0%); }
+            0% {
+                transform: translateY(200%);
+            }
+
+            100% {
+                transform: translateY(0%);
+            }
         }
 
         @-webkit-keyframes slide-in {
-            0% { transform: translateY(200%); }
-            100% { -webkit-transform: translateY(0%); }
+            0% {
+                transform: translateY(200%);
+            }
+
+            100% {
+                -webkit-transform: translateY(0%);
+            }
         }
-            
+
         @keyframes slide-out {
-            0% { transform: translateY(0%); }
-            100% { transform: translateY(200%); }
+            0% {
+                transform: translateY(0%);
+            }
+
+            100% {
+                transform: translateY(200%);
+            }
         }
 
         @-webkit-keyframes slide-out {
-            0% { -webkit-transform: translateY(0%); }
-            100% { -webkit-transform: translateY(200%); }
-        }
-        @keyframes gtfo{
-            0%{
-                transform: translateY(200%);
+            0% {
+                -webkit-transform: translateY(0%);
             }
-            100%{
-                transform: translateY(200%);
+
+            100% {
+                -webkit-transform: translateY(200%);
             }
         }
-        @-webkit-keyframes gtfo{
-            0%{
+
+        @keyframes gtfo {
+            0% {
                 transform: translateY(200%);
             }
-            100%{
+
+            100% {
                 transform: translateY(200%);
             }
+        }
+
+        @-webkit-keyframes gtfo {
+            0% {
+                transform: translateY(200%);
+            }
+
+            100% {
+                transform: translateY(200%);
+            }
+        }
+
+        /* private / public slider*/
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 13%;
+            padding: 15px;
+            font-size: 14px;
+            color: white;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ca2222;
+            -webkit-transition: .4s;
+            transition: .4s;
+            font-size: 14px;
+            box-shadow: 0 0 20px 0 rgb(0 0 0 / 20%), 0 5px 5px 0 rgb(0 0 0 / 24%);
+        }
+
+        .slider:before {
+            display: none;
+        }
+
+        input:checked+.slider {
+            background-color: #2ab934;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(55px);
+        }
+
+        .slider:after {
+            content: 'PRIVATE';
+        }
+
+        input:checked+.slider:after {
+            content: 'PUBLIC';
+        }
+
+        #createRoom{
+            width: 83%;
+        }
+        #private{
+            width: 13%;
         }
     </style>
 </head>
@@ -502,13 +633,14 @@
             <span>
                 by Tümi and Jan
             </span>
-        </h2>
-        <form name="login" class="loginform">
-            <input type="text" name="username" placeholder="Username">
-            <input type="number" name="roomcode" placeholder="Room code (ignored if you create a room)">
-            <input type="button" onclick="createRoom()" value="CREATE ROOM">
-            <input type="button" onclick="joinRoom()" value="JOIN ROOM">
-        </form>
+            </h2>
+            <form name="login" class="loginform">
+                <input type="text" name="username" placeholder="Username">
+                <input type="number" name="roomcode" placeholder="Room code (ignored if you create a room)">
+                <input type="button" onclick="createroom()" value="CREATE ROOM" id="createRoom">
+                <input type="button" onclick="togglePublic()" value="PUBLIC" id="private">
+                <input type="button" onclick="joinRoom()" value="JOIN ROOM">
+            </form>
     </section>
     <section id="mobile" style="display: none;">
         <h1 class="maintitle">
@@ -540,7 +672,8 @@
 
             <!-- Right-aligned links -->
             <div class="topnav-right">
-                <a class="topnavbutton" onclick="save(document.getElementById('can').toDataURL('image/jpg'), prompt('Enter a name for this image'));">SAVE</a>
+                <a class="topnavbutton"
+                    onclick="save(document.getElementById('can').toDataURL('image/jpg'), prompt('Enter a name for this image'));">SAVE</a>
                 <a id="room"></a>
                 <a id="time"></a>
                 <a id="drawer"></a>
@@ -578,7 +711,8 @@
                         <div class="color"></div><!-- space placeholder -->
                         <div style="background:rgb(216, 208, 208);">Eraser</div>
                         <div class="color"></div><!-- space placeholder -->
-                        <div class="color" style="background:white;border:2px solid;" id="white" onclick="color(this)"></div>
+                        <div class="color" style="background:white;border:2px solid;" id="white" onclick="color(this)">
+                        </div>
                         <input type="button" value="clear" id="clr" size="23" onclick="erase()">
                     </div>
                     <div class="brushes">
@@ -603,14 +737,14 @@
                 </div>
             </div>
             <div id="chat">
-                <ul id="messages" ></ul>
+                <ul id="messages"></ul>
                 <form id="form" action="">
                     <input maxlength="50" id="input" autocomplete="off" /><button>Send</button>
                 </form>
             </div>
         </div>
         <br>
-        
+
     </section>
     <section id="scoreboard" style="display: none;">
         <table class="styled-table" id="scoreboardtable">
@@ -625,24 +759,17 @@
             </thead>
         </table>
         <a class="topnavbutton" style="text-align: center;" onclick="leaveRoom()">Play again</a>
-        <a class="topnavbutton" style="text-align: center;" onclick="socket.emit('download images', room);">Download images</a>
+        <a class="topnavbutton" style="text-align: center;" onclick="socket.emit('download images', room);">Download
+            images</a>
     </section>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var username;
         var room;
         var currentDrawer;
+        var public = true;
         var dontDraw = true;
-        function createRoom() {
-            var usernamein = document.forms["login"]["username"].value;
-            if (usernamein == "" || usernamein == null || usernamein.length > 20 || (/^\s*$/.test(usernamein))) {
-                showPopup("Fill with valid username username");
-                return;
-            }
-            username = usernamein;
-            document.getElementById('startgamebutton').style.display = "block";
-            socket.emit('new room', username);
-        }
+
         function joinRoom() {
             var usernamein = document.forms["login"]["username"].value;
             var roomcodein = document.forms["login"]["roomcode"].value;
@@ -719,11 +846,11 @@
             let timer = setInterval(function () {
                 op += 0.05;
                 document.getElementById("choosewordcontainer").style.opacity = op;
-                if(op >= 1) {
+                if (op >= 1) {
                     clearInterval(timer);
                 }
             }, 50);
-            
+
         });
         socket.on('draw canvas', function (data) {
             var ctx = document.getElementById("can").getContext("2d");
@@ -763,7 +890,7 @@
         socket.on('time up', function (word) {
             document.getElementById('time').innerText = "Time's up!";
             document.getElementById('word').innerText = word;
-            currentDrawer = "";//prevents drawing for everyone
+            currentDrawer = ""; //prevents drawing for everyone
             document.getElementById('input').disabled = false;
             guessed = false;
             socket.emit('canvas data send',
@@ -784,7 +911,7 @@
             ctx.fillRect(0, 0, w, h);
             ctx.fillStyle = tmp;
         });
-        socket.on('scoreboard', function (obj){
+        socket.on('scoreboard', function (obj) {
             console.log(obj);
             document.getElementById('game').style.display = "none";
             document.getElementById("scoreboard").style.display = "block";
@@ -794,12 +921,13 @@
                 var player = document.createElement("tr");
                 let name = obj[i].name;
                 let points = obj[i].points + " points";
-                if(obj[i].points == 1) {
+                if (obj[i].points == 1) {
                     points = obj[i].points + " point";
                 }
                 let percentage = (obj[i].guessed / obj[i].tries * 100).toFixed(0) + "%";
-                percentage += "("+obj[i].guessed+"/"+obj[i].tries+")";
-                player.innerHTML = "<td>" + (i+1) + "</td><td>" + name + "</td><td>" + points + "</td><td>" + percentage + "</td>";
+                percentage += "(" + obj[i].guessed + "/" + obj[i].tries + ")";
+                player.innerHTML = "<td>" + (i + 1) + "</td><td>" + name + "</td><td>" + points + "</td><td>" +
+                    percentage + "</td>";
                 tbody.appendChild(player);
             }
             table.appendChild(tbody);
@@ -821,31 +949,35 @@
         socket.on('game started', function () {
             document.getElementById('startgamebutton').style.display = 'none';
         });
-        socket.on('images downloaded', function(images){
+        socket.on('images downloaded', function (images) {
             console.log(images);
             for (const img of images) {
                 save(img.data, img.name);
             }
         });
+
         function leaveRoom() {
             socket.emit('leave room', room);
             window.location.reload();
         }
+
         function destroyRoom() {
             socket.emit('destroy room', room);
         }
+
         function startGame() {
             socket.emit('start game', room);
         }
-        function togglePopup(message){
+
+        function togglePopup(message) {
             let $slider = document.getElementById('slider');
             let isOpen = $slider.classList.contains('slide-in');
             //console.log($slider.classList);
-            if(!message){
+            if (!message) {
                 message = "";
             }
             document.getElementById('popupmessage').innerText = message;
-            if(isOpen){
+            if (isOpen) {
                 $slider.removeAttribute('class', 'slide-in');
                 $slider.setAttribute('class', 'slide-out');
             } else {
@@ -854,8 +986,8 @@
             }
             return !isOpen;
         }
-        async function showPopup(message){
-            if(togglePopup(message)){
+        async function showPopup(message) {
+            if (togglePopup(message)) {
                 await sleep(1500);
                 togglePopup(message);
                 return;
@@ -865,19 +997,20 @@
             await sleep(1500);
             togglePopup(message);
         }
+
         function sendWordChoice(index) {
             document.getElementById('choosewordcontainer').style.visibility = 'hidden';
             socket.emit('get drawer', room);
             dontDraw = false;
             socket.emit('word picked', room, parseInt(index));
         }
-        async function sleep(ms){
-            return new Promise(resolve=>{
-                setTimeout(resolve,ms)
+        async function sleep(ms) {
+            return new Promise(resolve => {
+                setTimeout(resolve, ms)
             });
         }
         //if user is on a mobile device, disable log in
-        if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             document.getElementById('login').style.display = 'none';
             document.getElementById('mobile').style.display = 'block';
         }
@@ -888,15 +1021,15 @@
             //get current section
             let currentSection;
             for (const section of sections) {
-                if(section.style.display == 'block'){
+                if (section.style.display == 'block') {
                     currentSection = section;
                     break;
                 }
             }
-            if(currentSection.id != 'game' && document.getElementById('error').style.display == 'none'){
+            if (currentSection.id != 'game' && document.getElementById('error').style.display == 'none') {
                 return;
             }
-            if (window.innerWidth < 1000 || window.innerHeight < 850) {
+            if (window.innerWidth < 1300 || window.innerHeight < 850) {
                 document.getElementById('game').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
             } else {
@@ -904,6 +1037,29 @@
                 document.getElementById('error').style.display = 'none';
             }
         });
+
+        function togglePublic(){
+            if(public){
+                public = false;
+                document.getElementById('private').value = 'PRIVATE';
+            } else {
+                public = true;
+                document.getElementById('private').value = 'PUBLIC';
+            }
+            console.log(public);
+        }
+
+        function createroom() {
+            var usernamein = document.forms["login"]["username"].value;
+            if (usernamein == "" || usernamein == null || usernamein.length > 20 || (/^\s*$/.test(usernamein))) {
+                showPopup("Fill with valid username username");
+                return;
+            }
+            username = usernamein;
+            document.getElementById('startgamebutton').style.display = "block";
+            console.log("room is " + public);
+            socket.emit('new room', username, public);
+        }
     </script>
     <script>
         var canvas, ctx, flag = false,
@@ -943,7 +1099,7 @@
          * Function that, given an html object with the id
          * representing a color, checks if the color is allowed and
          * if it is, sets it as the current color.
-        */
+         */
         function color(obj) {
             var allowedColors = [
                 "green",
@@ -965,7 +1121,7 @@
         /**
          * Function that, given an html object with the id
          * representing a brush size, sets the brush size.
-        */
+         */
         function brush(obj) {
             switch (obj.id) {
                 case "small":
@@ -991,6 +1147,7 @@
                     break;
             }
         }
+
         function draw() {
             socket.emit('client canvas update', {
                 x: currX,
@@ -1012,6 +1169,7 @@
             ctx.stroke();
             ctx.closePath();
         }
+
         function erase() {
             if (username != currentDrawer || dontDraw) {
                 return;
@@ -1033,6 +1191,7 @@
                 ctx.fillStyle = tmp;
             }
         }
+
         function fillbg() {
             if (username != currentDrawer || dontDraw) {
                 return;
@@ -1052,6 +1211,7 @@
                 ctx.fillRect(0, 0, w, h);
             }
         }
+
         function save(data, name) {
             var link = document.createElement('a');
             link.download = name + '.jpg';
@@ -1093,7 +1253,6 @@
                 }
             }
         }
-
     </script>
 </body>
 
