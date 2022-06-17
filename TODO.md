@@ -24,6 +24,6 @@
  - [x] Js injection
  - [x] Leaderboard sort
  - [x] Flying save button
- - [ ] Public and private rooms
+ - [x] Public and private rooms
  - [ ] Leaderboard photos pick
- - [ ] Leaderboard sort
+ - [x] Leaderboard sort

@@ -113,7 +113,7 @@ io.on('connection', (socket) => {
     user.tries++;
     if (String(msg).toLowerCase() == String(roomMap[roomId1].currentWord).toLowerCase()) {
       user.guessed++;
-      message = username + "guessed correctly!";
+      message = username + " " + "guessed correctly!";
       io.in(roomId1).emit('chat message', ({ color: 'green', msg: message }));
       socket.emit('guessed correctly', roomMap[roomId1].currentWord);
       //add points to player
@@ -289,14 +289,8 @@ function startRound(room, socket) {
 
         io.to(roomMap[room].currentDrawer.socketId).emit('words', roomMap[room].current3Words);
       } else {
-        let scoreboard = roomMap[room].players.map(player => {
-          return {
-            name: player.name,
-            points: player.points,
-            tries: player.tries,
-            guessed: player.guessed
-          }
-        });
+        let scoreboard = roomMap[room].players;
+
         scoreboard.sort(
           (a, b) => {
             return b.points - a.points;

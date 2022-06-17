@@ -615,6 +615,58 @@
         #private{
             width: 13%;
         }
+        #publicrooms{
+            border-radius: 5px;
+            margin-top: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            width: 50%;
+            flex-direction: column;
+            align-items: center;
+            border-collapse: collapse;
+        }
+        #publicrooms td, #publicrooms th {
+            background-color: #2196F3;
+        }
+        #publicrooms th {
+            text-align: center;
+            padding-top: 12px;
+            padding-bottom: 12px;
+            background-color: #06F;
+            color: white;
+        }
+        .mfbutton {
+            outline: 0;
+            box-sizing: border-box;
+            text-transform: uppercase;
+            background: #06F;
+            width: 90%;
+            border: 0;
+            padding: 15px;
+            color: #FFFFFF;
+            font-size: 14px;
+            -webkit-transition: all 0.3 ease;
+            transition: all 0.3 ease;
+            cursor: pointer;
+            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        }
+        .mfsmallbutton{
+            outline: 0;
+            margin: 10px;
+            box-sizing: border-box;
+            text-transform: uppercase;
+            background: #2196F3;
+            width: 90%;
+            border: 0;
+            padding: 15px;
+            color: #FFFFFF;
+            font-size: 14px;
+            -webkit-transition: all 0.3 ease;
+            transition: all 0.3 ease;
+            cursor: pointer;
+            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        }
     </style>
 </head>
 
@@ -641,6 +693,13 @@
                 <input type="button" onclick="togglePublic()" value="PUBLIC" id="private">
                 <input type="button" onclick="joinRoom()" value="JOIN ROOM">
             </form>
+            <table id="publicrooms">
+                <tr>
+                    <th>Room code</th>
+                    <th>Players</th>
+                    <th><input type="button" onclick="refreshRooms()" value="REFRESH"></th>
+                </tr>
+            </table>
     </section>
     <section id="mobile" style="display: none;">
         <h1 class="maintitle">
@@ -770,9 +829,13 @@
         var public = true;
         var dontDraw = true;
 
-        function joinRoom() {
+        function joinRoom(supposedRoom) {
             var usernamein = document.forms["login"]["username"].value;
-            var roomcodein = document.forms["login"]["roomcode"].value;
+            if(!supposedRoom) {
+                var roomcodein = document.forms["login"]["roomcode"].value;
+            }else{
+                var roomcodein = supposedRoom;
+            }
             if (usernamein == "" || roomcodein == "" || usernamein == null || roomcodein == null) {
                 showPopup("Please fill in all fields");
                 return;
@@ -794,6 +857,10 @@
                 input.value = '';
             }
         });
+        function refreshRooms(){
+            socket.emit('get public rooms');
+        }
+        refreshRooms();
 
         socket.on('alert', function (msg) {
             showPopup(msg);
@@ -829,6 +896,31 @@
             item.style.color = msgObj.color;
             messages.appendChild(item);
             messages.scrollTo(0, messages.scrollHeight);
+        });
+        socket.on('public rooms', function(rooms){
+            console.log(rooms);
+            let container = document.getElementById("publicrooms");
+            container.innerHTML = "<tr><th>Room code</th><th>Players</th><th><input class='mfbutton' type='button' onclick='refreshRooms()' value='REFRESH'></th></tr>";
+            for(let i = 0; i < rooms.length; i++){
+                let row = document.createElement("tr");
+                let roomcode = document.createElement("td");
+                roomcode.innerText = rooms[i].id;
+                let players = document.createElement("td");
+                players.innerText = rooms[i].players.length;
+                let join = document.createElement("td");
+                join.colSpan = "100";
+                let joinbutton = document.createElement("button");
+                joinbutton.innerText = "Join";
+                joinbutton.classList += "mfsmallbutton";
+                joinbutton.onclick = function(){
+                    joinRoom(rooms[i].id);
+                };
+                join.appendChild(joinbutton);
+                row.appendChild(roomcode);
+                row.appendChild(players);
+                row.appendChild(join);
+                container.appendChild(row);
+            }
         });
         socket.on('room destroyed', function () {
             window.location.reload();
@@ -1021,7 +1113,7 @@
             //get current section
             let currentSection;
             for (const section of sections) {
-                if (section.style.display == 'block') {
+                if (section.style.display != 'none') {
                     currentSection = section;
                     break;
                 }
