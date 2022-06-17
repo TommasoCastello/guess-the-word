@@ -286,7 +286,6 @@ function startRound(room, socket) {
       if (roomMap[room].currentRound <= roomMap[room].players.length) {
         console.log("starting next round");
         roomMap[room].current3Words = getRandomWords();
-
         io.to(roomMap[room].currentDrawer.socketId).emit('words', roomMap[room].current3Words);
       } else {
         let scoreboard = roomMap[room].players;
@@ -296,7 +295,7 @@ function startRound(room, socket) {
             return b.points - a.points;
           }
         );
-        io.in(room).emit('scoreboard', roomMap[room].players);
+        io.in(room).emit('scoreboard', roomMap[room].players, roomMap[room].canvasImages);
       }
     } else {
       roomMap[room].timeLeft--;

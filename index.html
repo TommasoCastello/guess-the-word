@@ -667,6 +667,25 @@
             cursor: pointer;
             box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
         }
+        #images{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #images img{
+            width: 30%;
+            margin: 1%;
+            float: left;
+        }
+        #images span{
+            text-align: center;
+            float: left;
+        }
+        #images img:hover{
+            opacity: 0.5;
+        }
     </style>
 </head>
 
@@ -820,6 +839,7 @@
         <a class="topnavbutton" style="text-align: center;" onclick="leaveRoom()">Play again</a>
         <a class="topnavbutton" style="text-align: center;" onclick="socket.emit('download images', room);">Download
             images</a>
+        <div id="images"></div>
     </section>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -1003,7 +1023,7 @@
             ctx.fillRect(0, 0, w, h);
             ctx.fillStyle = tmp;
         });
-        socket.on('scoreboard', function (obj) {
+        socket.on('scoreboard', function (obj, images) {
             console.log(obj);
             document.getElementById('game').style.display = "none";
             document.getElementById("scoreboard").style.display = "block";
@@ -1023,6 +1043,16 @@
                 tbody.appendChild(player);
             }
             table.appendChild(tbody);
+            let container = document.getElementById("images");
+            container.innerHTML = "";
+            for (let i = 0; i < images.length; i++) {
+                let img = document.createElement("img");
+                img.src = images[i].data;
+                img.onclick = function () {
+                    save(images[i].data, images[i].name);
+                }
+                container.appendChild(img);
+            }
         });
         socket.on('full word for drawer', function (word) {
             document.getElementById('word').innerText = word;
