@@ -160,7 +160,6 @@ io.on('connection', (socket) => {
     }
   });
   socket.on('destroy room', (room) => {
-    console.log(roomMap[room].players);
     if (!(room in roomMap)) {
       socket.emit('alert', "room not found");
       return;
@@ -247,17 +246,21 @@ io.on('connection', (socket) => {
     if (user != roomMap[room].currentDrawer.name) {
       return;
     }
+    console.log("canvas data received");
+    // console.log(roomMap[room].beforeWord);
+    // roomMap[room].canvasImages.forEach(image => {
+    //   console.log(image.name);
+    // });
     roomMap[room].canvasImages.push(new CanvasImage(data, roomMap[room].beforeWord));
+    io.in(room).emit('image', roomMap[room].canvasImages[roomMap[room].canvasImages.length - 1]);
   });
   socket.on('get public rooms', () => {
     let privateRooms = [];
     for (let room in roomMap) {
-      console.log(room);
       if (roomMap[room].public && !roomMap[room].started) {
         privateRooms.push(roomMap[room]);
       }
     }
-    console.log(privateRooms);
     socket.emit('public rooms', privateRooms);
   });
 });
@@ -282,9 +285,7 @@ function startRound(room, socket) {
       roomMap[room].currentWord = "";
       roomMap[room].wordHint = "";
       changeDrawer(room);
-      console.log("round ended", roomMap[room].currentDrawer.name);
       if (roomMap[room].currentRound <= roomMap[room].players.length) {
-        console.log("starting next round");
         roomMap[room].current3Words = getRandomWords();
         io.to(roomMap[room].currentDrawer.socketId).emit('words', roomMap[room].current3Words);
       } else {
@@ -295,12 +296,11 @@ function startRound(room, socket) {
             return b.points - a.points;
           }
         );
-        io.in(room).emit('scoreboard', roomMap[room].players, roomMap[room].canvasImages);
+        io.in(room).emit('scoreboard', roomMap[room].players);
       }
     } else {
       roomMap[room].timeLeft--;
       roomMap[room].wordHint = getWordHint(roomMap[room]);
-      console.log("wordHInt", roomMap[room].wordHint);
       io.in(room).emit('word hint', roomMap[room].wordHint);
       io.in(room).emit('timer', { countdown: roomMap[room].timeLeft });
     }
@@ -340,7 +340,6 @@ function getWordHint(room) {
     return "_".repeat(word.length);
   }
   if ((room.wordHint.split("_").length - 1) / room.wordHint.length <= 0.4) {
-    console.log("skip percentuale");
     return room.wordHint;
   }
   let totalTime = defaultTime;
@@ -363,12 +362,9 @@ function getWordHint(room) {
 
 function changeDrawer(room) {
   let index = roomMap[room].players.map(function (e) { return e.name; }).indexOf(roomMap[room].currentDrawer.name) + 1;
-  console.log("index", index);
   index = index >= roomMap[room].players.length ? 0 : index;
-  console.log("old drawer", roomMap[room].currentDrawer);
   roomMap[room].beforeDrawer = roomMap[room].currentDrawer;
   roomMap[room].currentDrawer = roomMap[room].players[index];
-  console.log("new drawer", roomMap[room].currentDrawer);
   io.in(room).emit('current drawer', roomMap[room].currentDrawer.name);
 }
 function spaceString(string) {

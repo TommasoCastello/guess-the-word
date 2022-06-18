@@ -26,5 +26,5 @@
  - [x] Flying save button
  - [x] Public and private rooms
  - [x] Leaderboard photos pick
- - [ ] Leaderboard get all photos (last is missing)
+ - [x] Leaderboard get all photos (last is missing)
  - [x] Leaderboard sort
