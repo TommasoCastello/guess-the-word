@@ -1,3 +1,4 @@
+//#region Variables and constants
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
@@ -8,12 +9,15 @@ const fs = require('fs');
 const words = JSON.parse(fs.readFileSync('words.json', 'utf8'));
 const maxPlayers = 12;
 const defaultTime = 80;
+const maxPoints = 1000;
+var roomMap = {};
 
 app.use(express.static(__dirname + '/public'));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
-
+//#endregion
+//#region Classes
 class Room {
   constructor(id, owner, publicFlag) {
     console.log(id, owner);
@@ -52,8 +56,7 @@ class CanvasImage {
     this.name = name;
   }
 }
-var roomMap = {};
-
+//#endregion
 io.on('connection', (socket) => {
 
   socket.on('join room', (roomId, playerName) => {
@@ -80,67 +83,67 @@ io.on('connection', (socket) => {
 
   socket.on('new room', (playerName, public) => {
     // create new room
-    let roomId1 = 0;
-    while (roomId1 in roomMap) {
-      roomId1++;
+    let roomId = 0;
+    while (roomId in roomMap) {
+      roomId++;
     }
-    roomId1 = String(roomId1);
+    roomId = String(roomId);
     let owner = new Player(playerName, socket.id);
-    let newRoom = new Room(String(roomId1), owner, public);
-    console.log(owner.name + " created room " + roomId1);
-    roomMap[roomId1] = newRoom;
+    let newRoom = new Room(roomId, owner, public);
+    console.log(owner.name + " created room " + roomId);
+    roomMap[roomId] = newRoom;
 
     // owner joins new room
-    socket.emit('created room', roomId1);
+    socket.emit('created room', roomId);
   });
-  socket.on('chat message', (msg, roomId1) => {
-    roomId1 = String(roomId1);
-    if (!(roomId1 in roomMap)) {
+  socket.on('chat message', (msg, roomId) => {
+    roomId = String(roomId);
+    if (!(roomId in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    let username = getUsername(socket, roomId1);
+    let username = getUsername(socket, roomId);
     msg = msg.substring(0, 50);
     let message = username + ": " + msg;
-    if (!(roomMap[roomId1].started)
-      || roomMap[roomId1].currentDrawer.name == username) {
-      io.in(roomId1).emit('chat message', ({ color: 'black', msg: message }));
+    if (!(roomMap[roomId].started)
+      || roomMap[roomId].currentDrawer.name == username) {
+      io.in(roomId).emit('chat message', ({ color: 'black', msg: message }));
       return;
     }
     //get the user 
-    let user = roomMap[roomId1].players.find(player => player.name == username);
+    let user = roomMap[roomId].players.find(player => player.name == username);
     if (user == undefined) {
       return;
     }
     user.tries++;
-    if (String(msg).toLowerCase() == String(roomMap[roomId1].currentWord).toLowerCase()) {
+    if (String(msg).toLowerCase() == String(roomMap[roomId].currentWord).toLowerCase()) {
       user.guessed++;
       message = username + " " + "guessed correctly!";
-      io.in(roomId1).emit('chat message', ({ color: 'green', msg: message }));
-      socket.emit('guessed correctly', roomMap[roomId1].currentWord);
+      io.in(roomId).emit('chat message', ({ color: 'green', msg: message }));
+      socket.emit('guessed correctly', roomMap[roomId].currentWord);
       //add points to player
-      roomMap[roomId1].players.forEach(player => {
+      roomMap[roomId].players.forEach(player => {
         if (player.name == username) {
-          player.points += getPoints(roomMap[roomId1]);
-          roomMap[roomId1].currentDrawer.points += getDrawerPoints(roomMap[roomId1]);
+          player.points += getPoints(roomMap[roomId]);
+          roomMap[roomId].currentDrawer.points += getDrawerPoints(roomMap[roomId]);
         }
       });
-      roomMap[roomId1].guessedCounter++;
-      io.in(roomId1).emit('player updated', roomMap[roomId1].players);
+      roomMap[roomId].guessedCounter++;
+      io.in(roomId).emit('player updated', roomMap[roomId].players);
     } else {
-      io.in(roomId1).emit('chat message', ({ color: 'black', msg: message }));
+      io.in(roomId).emit('chat message', ({ color: 'black', msg: message }));
     }
   });
-  socket.on('leave room', (room) => {
-    if (room in roomMap) {
-      let user = getUsername(socket, room);
-      console.log(user + " disconnected from room " + room);
-      if (roomMap[room].players.some(player => player.name == user)) {
-        roomMap[room].players.splice(roomMap[room].players.indexOf(user), 1);
-        io.in(room).emit('player updated', roomMap[room].players);
-        if (roomMap[room].players.length == 0) {
-          console.log("room " + room + " is empty, deleting");
-          delete roomMap[room];
+  socket.on('leave room', (roomId) => {
+    if (roomId in roomMap) {
+      let user = getUsername(socket, roomId);
+      console.log(user + " disconnected from room " + roomId);
+      if (roomMap[roomId].players.some(player => player.name == user)) {
+        roomMap[roomId].players.splice(roomMap[roomId].players.indexOf(user), 1);
+        io.in(roomId).emit('player updated', roomMap[roomId].players);
+        if (roomMap[roomId].players.length == 0) {
+          console.log("room " + roomId + " is empty, deleting");
+          delete roomMap[roomId];
         }
       }
     }
@@ -161,26 +164,26 @@ io.on('connection', (socket) => {
       }
     }
   });
-  socket.on('destroy room', (room) => {
-    if (!(room in roomMap)) {
+  socket.on('destroy room', (roomId) => {
+    if (!(roomId in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    let user = getUsername(socket, room);
-    if (roomMap[room].owner.name != user) {
+    let user = getUsername(socket, roomId);
+    if (roomMap[roomId].owner.name != user) {
       socket.emit('alert', "you are not the owner of this room");
       return;
     }
-    io.in(room).emit('room destroyed');
-    console.log("deleting room " + room);
-    delete roomMap[room];//idk if this works, copilot did it
+    io.in(roomId).emit('room destroyed');
+    console.log("deleting room " + roomId);
+    delete roomMap[roomId];//idk if this works, copilot did it
   });
-  socket.on('download images', (room) => {
-    if (!(room in roomMap)) {
+  socket.on('download images', (roomId) => {
+    if (!(roomId in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    socket.emit('images downloaded', roomMap[room].canvasImages);
+    socket.emit('images downloaded', roomMap[roomId].canvasImages);
   });
   socket.on('client canvas update', (data) => {
     data.room = String(data.room);
@@ -194,67 +197,67 @@ io.on('connection', (socket) => {
     }
     io.in(data.room).emit('draw canvas', data);
   });
-  socket.on('get drawer', (room) => {
-    if (!(room in roomMap)) {
+  socket.on('get drawer', (roomId) => {
+    if (!(roomId in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    socket.emit('current drawer', roomMap[room].currentDrawer.name);
+    socket.emit('current drawer', roomMap[roomId].currentDrawer.name);
   });
-  socket.on('start game', (room) => {
-    if (!(room in roomMap)) {
+  socket.on('start game', (roomId) => {
+    if (!(roomId in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    let owner = getUsername(socket, room);
-    if (roomMap[room].started) {
+    let owner = getUsername(socket, roomId);
+    if (roomMap[roomId].started) {
       socket.emit('alert', "game already started");
       return;
     }
-    if (String(owner) != String(roomMap[room].owner.name)) {
+    if (String(owner) != String(roomMap[roomId].owner.name)) {
       socket.emit('alert', "u have to be the owner to start the game");
       return;
     }
-    if (roomMap[room].players.length < 2) {
+    if (roomMap[roomId].players.length < 2) {
       socket.emit('alert', "u have to have at least 2 players to start the game");
       return;
     }
-    roomMap[room].started = true;
-    roomMap[room].current3Words = getRandomWords();
+    roomMap[roomId].started = true;
+    roomMap[roomId].current3Words = getRandomWords();
     socket.emit('game started');
-    socket.emit('words', roomMap[room].current3Words);
+    socket.emit('words', roomMap[roomId].current3Words);
   });
-  socket.on('word picked', (room, wordIndex) => {
-    if (!(room in roomMap)) {
+  socket.on('word picked', (roomId, wordIndex) => {
+    if (!(roomId in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    let username = getUsername(socket, room);
-    if (username != roomMap[room].currentDrawer.name) {
+    let username = getUsername(socket, roomId);
+    if (username != roomMap[roomId].currentDrawer.name) {
       return;
     }
-    roomMap[room].currentWord = roomMap[room].current3Words[wordIndex & 3];
-    socket.emit('full word for drawer', roomMap[room].currentWord);
-    console.log("picked word " + roomMap[room].currentWord);
-    startRound(room, socket);
+    roomMap[roomId].currentWord = roomMap[roomId].current3Words[wordIndex & 3];
+    socket.emit('full word for drawer', roomMap[roomId].currentWord);
+    console.log("picked word " + roomMap[roomId].currentWord);
+    startRound(roomId, socket);
   });
-  socket.on('canvas data send', (data, room) => {
-    room = String(room);
-    if (!(room in roomMap)) {
+  socket.on('canvas data send', (data, roomId) => {
+    roomId = String(roomId);
+    if (!(roomId in roomMap)) {
       socket.emit('alert', "room not found");
       return;
     }
-    let user = getUsername(socket, room);
-    if (user != roomMap[room].currentDrawer.name) {
+    let user = getUsername(socket, roomId);
+    if (user != roomMap[roomId].currentDrawer.name) {
       return;
     }
     console.log("canvas data received");
-    // console.log(roomMap[room].beforeWord);
-    // roomMap[room].canvasImages.forEach(image => {
+    // console.log(roomMap[roomId].beforeWord);
+    // roomMap[roomId].canvasImages.forEach(image => {
     //   console.log(image.name);
     // });
-    roomMap[room].canvasImages.push(new CanvasImage(data, roomMap[room].beforeWord));
-    io.in(room).emit('image', roomMap[room].canvasImages[roomMap[room].canvasImages.length - 1]);
+    roomMap[roomId].canvasImages.push(new CanvasImage(data, roomMap[roomId].beforeWord));
+    io.in(roomId).emit('image', roomMap[roomId].canvasImages[roomMap[roomId].canvasImages.length - 1]);
   });
   socket.on('get public rooms', () => {
     let privateRooms = [];
@@ -266,45 +269,45 @@ io.on('connection', (socket) => {
     socket.emit('public rooms', privateRooms);
   });
 });
-function startRound(room, socket) {
-  if (!(room in roomMap)) {
+function startRound(roomId, socket) {
+  if (!(roomId in roomMap)) {
     socket.emit('alert', "room not found");
     return;
   }
-  roomMap[room].guessedCounter = 0;
-  roomMap[room].currentRound++;
-  if (roomMap[room].currentRound == 0) {
-    roomMap[room].currentDrawer = roomMap[room].players[0];
+  roomMap[roomId].guessedCounter = 0;
+  roomMap[roomId].currentRound++;
+  if (roomMap[roomId].currentRound == 0) {
+    roomMap[roomId].currentDrawer = roomMap[roomId].players[0];
   }
-  socket.emit('current drawer', roomMap[room].currentDrawer.name);
-  roomMap[room].timer = setInterval(function () {
-    if (roomMap[room].timeLeft == 0 || roomMap[room].guessedCounter == roomMap[room].players.length - 1) {
+  socket.emit('current drawer', roomMap[roomId].currentDrawer.name);
+  roomMap[roomId].timer = setInterval(function () {
+    if (roomMap[roomId].timeLeft == 0 || roomMap[roomId].guessedCounter == roomMap[roomId].players.length - 1) {
       // end round
-      clearInterval(roomMap[room].timer);
-      roomMap[room].timeLeft = defaultTime;
-      io.in(room).emit('time up', roomMap[room].currentWord);
-      roomMap[room].beforeWord = roomMap[room].currentWord;
-      roomMap[room].currentWord = "";
-      roomMap[room].wordHint = "";
-      changeDrawer(room);
-      if (roomMap[room].currentRound <= roomMap[room].players.length) {
-        roomMap[room].current3Words = getRandomWords();
-        io.to(roomMap[room].currentDrawer.socketId).emit('words', roomMap[room].current3Words);
+      clearInterval(roomMap[roomId].timer);
+      roomMap[roomId].timeLeft = defaultTime;
+      io.in(roomId).emit('time up', roomMap[roomId].currentWord);
+      roomMap[roomId].beforeWord = roomMap[roomId].currentWord;
+      roomMap[roomId].currentWord = "";
+      roomMap[roomId].wordHint = "";
+      changeDrawer(roomId);
+      if (roomMap[roomId].currentRound <= roomMap[roomId].players.length) {
+        roomMap[roomId].current3Words = getRandomWords();
+        io.to(roomMap[roomId].currentDrawer.socketId).emit('words', roomMap[roomId].current3Words);
       } else {
-        let scoreboard = roomMap[room].players;
+        let scoreboard = roomMap[roomId].players;
 
         scoreboard.sort(
           (a, b) => {
             return b.points - a.points;
           }
         );
-        io.in(room).emit('scoreboard', roomMap[room].players);
+        io.in(roomId).emit('scoreboard', roomMap[roomId].players);
       }
     } else {
-      roomMap[room].timeLeft--;
-      roomMap[room].wordHint = getWordHint(roomMap[room]);
-      io.in(room).emit('word hint', roomMap[room].wordHint);
-      io.in(room).emit('timer', { countdown: roomMap[room].timeLeft });
+      roomMap[roomId].timeLeft--;
+      roomMap[roomId].wordHint = getWordHint(roomMap[roomId]);
+      io.in(roomId).emit('word hint', roomMap[roomId].wordHint);
+      io.in(roomId).emit('timer', { countdown: roomMap[roomId].timeLeft });
     }
   }, 1000);
 }
@@ -326,14 +329,12 @@ function nameAlreadyInUse(playerArray, name) {
   return flag;
 }
 function getPoints(room) {
-  const maxPoints = 1000;
   let players = room.players.length;
   let guessedCounter = room.guessedCounter;
   const step = maxPoints / players;
   return Math.floor(maxPoints - (step * guessedCounter));
 }
 function getDrawerPoints(room) {
-  const maxPoints = 1000;
   return Math.floor(maxPoints / (room.players.length - 1));
 }
 function getWordHint(room) {
@@ -356,28 +357,25 @@ function getWordHint(room) {
         charIndex = Math.floor(Math.random() * previousHint.length);
       }
       charArray[charIndex] = word.split('')[charIndex];
-      return spaceString(charArray.join(''));
+      return charArray.join('');
     }
   }
   return room.wordHint;
 }
 
-function changeDrawer(room) {
-  let index = roomMap[room].players.map(function (e) { return e.name; }).indexOf(roomMap[room].currentDrawer.name) + 1;
-  index = index >= roomMap[room].players.length ? 0 : index;
-  roomMap[room].beforeDrawer = roomMap[room].currentDrawer;
-  roomMap[room].currentDrawer = roomMap[room].players[index];
-  io.in(room).emit('current drawer', roomMap[room].currentDrawer.name);
+function changeDrawer(roomId) {
+  let index = roomMap[roomId].players.map(function (e) { return e.name; }).indexOf(roomMap[roomId].currentDrawer.name) + 1;
+  index = index >= roomMap[roomId].players.length ? 0 : index;
+  roomMap[roomId].beforeDrawer = roomMap[roomId].currentDrawer;
+  roomMap[roomId].currentDrawer = roomMap[roomId].players[index];
+  io.in(roomId).emit('current drawer', roomMap[roomId].currentDrawer.name);
 }
-function spaceString(string) {
-  return string;
-}
-function getUsername(socket, room) {
-  room = String(room);
-  if (!(room in roomMap)) {
+function getUsername(socket, roomId) {
+  roomId = String(roomId);
+  if (!(roomId in roomMap)) {
     return undefined;
   }
-  let player = roomMap[room].players.find(p => p.socketId == socket.id);
+  let player = roomMap[roomId].players.find(p => p.socketId == socket.id);
   if (player === undefined) {
     return undefined;
   }

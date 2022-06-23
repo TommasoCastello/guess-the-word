@@ -69,7 +69,7 @@ socket.on('public rooms', function (rooms) {
         joinbutton.innerText = "Join";
         joinbutton.classList += "mfsmallbutton";
         joinbutton.onclick = function () {
-            joinRoom(rooms[i].id);
+            joinRoomWithCode(rooms[i].id);
         };
         join.appendChild(joinbutton);
         row.appendChild(roomcode);
@@ -340,20 +340,27 @@ function refreshRooms() {
     socket.emit('get public rooms');
 }
 
-function joinRoom(supposedRoom) {
+function joinRoomWithCode(supposedRoom) {
     var usernamein = document.forms["login"]["username"].value;
-    if (!supposedRoom) {
-        var roomcodein = document.forms["login"]["roomcode"].value;
-    } else {
-        var roomcodein = supposedRoom;
-    }
+    var roomcodein = supposedRoom;
     if (usernamein == "" || roomcodein == "" || usernamein == null || roomcodein == null) {
         showPopup("Please fill in all fields");
         return;
     }
     username = usernamein;
     room = roomcodein;
-    socket.emit('join room', room, username);
+    socket.emit('join room', String(room), username);
+}
+function joinRoom(){
+    var usernamein = document.forms["login"]["username"].value;
+    var roomcodein = document.forms["login"]["roomcode"].value;
+    if (usernamein == "" || roomcodein == "" || usernamein == null || roomcodein == null) {
+        showPopup("Please fill in all fields");
+        return;
+    }
+    username = usernamein;
+    room = roomcodein;
+    socket.emit('join room', String(room), username);
 }
 //#endregion
 //#region Generic functions

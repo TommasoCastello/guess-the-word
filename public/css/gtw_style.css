@@ -664,7 +664,6 @@ input:checked+.slider:after {
 }
 #images{
     width: 100%;
-    height: 100vh;
     overflow: auto;
     display: grid;
     grid-template-columns: repeat(4,1fr);
