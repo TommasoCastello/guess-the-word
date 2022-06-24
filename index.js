@@ -13,10 +13,7 @@ const maxPoints = 1000;
 var roomMap = {};
 
 app.use(express.static(__dirname + '/public'));
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/pickgame.html');
-});
-app.get('/guesstheword', (req, res) => {
+app.get('/guess-the-word', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 //#endregion
