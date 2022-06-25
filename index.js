@@ -12,9 +12,17 @@ const defaultTime = 80;
 const maxPoints = 1000;
 var roomMap = {};
 
-app.use(express.static(__dirname + '/public'));
-app.get('/guess-the-word', (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
+});
+app.get('/css/gtw_style.css', (req, res) => {
+  res.sendFile(__dirname + '/public/css/gtw_style.css');
+});
+app.get('/js/gtw_index.js', (req, res) => {
+  res.sendFile(__dirname + '/public/js/gtw_index.js');
+});
+app.get('/js/gtw_drawing.js', (req, res) => {
+  res.sendFile(__dirname + '/public/js/gtw_drawing.js');
 });
 //#endregion
 //#region Classes
