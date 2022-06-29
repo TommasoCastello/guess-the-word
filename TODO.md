@@ -28,3 +28,10 @@
  - [x] Leaderboard photos pick
  - [x] Leaderboard get all photos (last is missing)
  - [x] Leaderboard sort
+ - [ ] Problema round
+ - [ ] Problema chat
+ - [ ] Quit durante partita
+ - [ ] Scroll immagimi
+ - [ ] Memoria testo
+ - [ ] ctrl z disegno
+ - [ ] Conferma con kick automatico 
